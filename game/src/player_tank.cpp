@@ -3,19 +3,20 @@
 
 player_tank::player_tank() {
 
+	// Initialize tank characteristics
 	m_position = glm::vec2(.0f, .0f);
 	m_velocity = glm::vec2(.0f, 1.0f);
 	m_speed = 120.0f;
 	m_angle = 0.0f;
 	m_is_moving = false;
 
+	// Initialize tank sprites and animation
 	m_chassis_sprite = sprite::create("assets/textures/lightvehicles.png", 26, 26);
 	for (int i = 0; i < 4; i++) {
 		m_chassis_sprite->add_frame_quad(26, 26, i, 0);
 	}
 	m_chassis_sprite->set_frame_time(0.05f);
 	m_chassis_sprite->set_animating(true);
-	m_chassis_sprite->set_transparency(0.5f);
 
 	m_turret_sprite = sprite::create("assets/textures/turrets.png", 42, 42);
 	m_turret_sprite->add_frame_quad(42, 42, 2, 0);
@@ -26,6 +27,7 @@ player_tank::~player_tank() {
 
 }
 
+//Call every frame
 void player_tank::on_update(const engine::timestep& time_step) {
 	m_is_moving = false;
 
@@ -60,7 +62,7 @@ void player_tank::on_update(const engine::timestep& time_step) {
 	m_turret_sprite->on_update(time_step);
 
 }
-
+// Call to render the tank.
 void player_tank::on_render(engine::ref<engine::shader> shader) {
 	glm::mat4 chassis_transform(1.0f);
 	chassis_transform = glm::translate(chassis_transform, glm::vec3(m_position.x,m_position.y,.0f));
@@ -78,6 +80,7 @@ void player_tank::on_event(engine::event& event) {
 	
 }
 
+// Create pointer to class
 engine::ref<player_tank> player_tank::create()
 {
 	return std::make_shared<player_tank>();

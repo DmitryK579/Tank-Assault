@@ -35,47 +35,29 @@ application_layer::application_layer()
 	std::dynamic_pointer_cast<engine::gl_shader>(text_shader)->set_uniform("projection",
 		glm::ortho(0.f, (float)engine::application::window().width(), 0.f,
 		(float)engine::application::window().height()));
-
-	// Load the tree model. Create a tree object. Set its properties
-	/*
-	engine::ref <engine::model> tree_model = engine::model::create("assets/models/static/elm.3ds");
-	engine::game_object_properties tree_props;
-	tree_props.meshes = tree_model->meshes();
-	tree_props.textures = tree_model->textures();
-	float tree_scale = 3.f / glm::max(tree_model->size().x, glm::max(tree_model->size().y, tree_model->size().z));
-	tree_props.position = { 4.f, 0.5f, -5.f };
-	tree_props.bounding_shape = tree_model->size() / 2.f * tree_scale;
-	tree_props.scale = glm::vec3(tree_scale);
-	m_tree = engine::game_object::create(tree_props);
-	*/
 	
 	m_text_manager = engine::text_manager::create();
-
-	//m_sprite = sprite::create("assets/textures/base.png", 80, 80, 4, 1.f);
 
 	// Initialize main menu
 	m_main_menu = main_menu::create();
 	m_in_menu = true;
 
 	m_level = level::create();
+	m_in_level = false;
 }
 
 application_layer::~application_layer() {}
 
 void application_layer::on_update(const engine::timestep& time_step) 
 {
-    //m_3d_camera.on_update(time_step);
-
-	//m_physics_manager->dynamics_world_update(m_game_objects, double(time_step));
-
-	//m_mannequin->animated_mesh()->on_update(time_step);
-
-	//m_sprite->on_update(time_step);
 
 	if (m_in_menu) {
 		m_in_menu = m_main_menu->on_update(time_step);
+		if (!m_in_menu) {
+			m_in_level = true;
+		}
 	}
-	else {
+	else if (m_in_level){
 		m_level->on_update(time_step);
 	}
 } 
@@ -89,16 +71,14 @@ void application_layer::on_render()
 	const auto textured_lighting_shader = engine::renderer::shaders_library()->get("mesh_lighting");
 	engine::renderer::begin_scene(m_2d_camera, textured_lighting_shader);
 
-	//glm::mat4 transform(1.0f);
-	//transform = glm::translate(transform, glm::vec3(0.f, 0.f, -0.1f));
-	//m_sprite->on_render(transform, textured_lighting_shader);
-
 	const auto text_shader = engine::renderer::shaders_library()->get("text_2D");
 	if (m_in_menu) {
+		// Render menu
 		m_main_menu->on_render(textured_lighting_shader, text_shader);
 
 	}
-	else {
+	else if (m_in_level){
+		// Render level
 		m_level->on_render(textured_lighting_shader);
 	}
 	engine::renderer::end_scene();
@@ -111,9 +91,11 @@ void application_layer::on_event(engine::event& event)
     if(event.event_type() == engine::event_type_e::key_pressed) 
     {
 		if (m_in_menu) {
+			// Pass key event type to menu
 			m_main_menu->on_event(event);
 		}
-		else {
+		else if (m_in_level){
+			// Pass key event type to level entities
 			m_level->on_event(event);
 			auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 			if (e.key_code() == engine::key_codes::KEY_TAB)

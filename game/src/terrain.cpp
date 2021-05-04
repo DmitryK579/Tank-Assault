@@ -9,7 +9,8 @@ terrain::terrain(const std::string& path) {
 terrain::~terrain() {
 
 }
-
+// Create quads of ground tiles based on tile positions in the spritesheet. Uses square positions in horizontal 
+// and vertical axis instead of precise pixel coordinates.
 void terrain::build_layout(int horizontal_tile_number, int vertical_tile_number, const std::vector<std::pair<int,int>>& terrain_sequence) {
 	m_horizontal_tile_number = horizontal_tile_number;
 	m_vertical_tile_number = vertical_tile_number;
@@ -18,14 +19,15 @@ void terrain::build_layout(int horizontal_tile_number, int vertical_tile_number,
 	float image_step_y = 1.0f/(m_terrain_spritesheet->height() / m_tile_size_y);
 
 	for (int i = 0; i < terrain_sequence.size(); i++) {
-		//y texture coordinate is inversed so quad texture appears from top to bottom of the image instead from bottom to top.
+		//y texture coordinate y is inversed so quad texture appears from top to bottom of the image instead from bottom to top.
 		engine::ref<quad> quad = quad::create(glm::vec2(m_tile_size_x, m_tile_size_y),
 			glm::vec2(terrain_sequence[i].first * image_step_x, terrain_sequence[i].first * image_step_x + image_step_x),
-			glm::vec2(1.f-(terrain_sequence[i].second * image_step_y), 1.f-(terrain_sequence[i].second * image_step_y + image_step_y)));
+			glm::vec2(1.f-(terrain_sequence[i].second * image_step_y + image_step_y), 1.f - (terrain_sequence[i].second * image_step_y)));
 		m_terrain_quads.push_back(quad);
 	}
 }
 
+// Call to render all ground tiles.
 void terrain::on_render(engine::ref<engine::shader> shader) {
 	m_terrain_spritesheet->bind();
 	int quad_index = 0;
@@ -43,6 +45,7 @@ void terrain::on_render(engine::ref<engine::shader> shader) {
 	}
 }
 
+//Create pointer to class.
 engine::ref<terrain> terrain::create(const std::string& path)
 {
 	return std::make_shared<terrain>(path);

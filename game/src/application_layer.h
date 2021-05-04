@@ -1,6 +1,5 @@
 #pragma once
 #include <engine.h>
-#include "cross_fade.h"
 #include "sprite.h"
 #include "main_menu.h"
 #include "level.h"
@@ -26,4 +25,5 @@ private:
 	bool								m_in_menu;
 
 	engine::ref<level>					m_level{};
+	bool								m_in_level;
 };

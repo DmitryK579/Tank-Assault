@@ -100,10 +100,12 @@ main_menu::~main_menu() {
 
 }
 
+//Call each frame
 bool main_menu::on_update(const engine::timestep& time_step) {
 	return m_in_menu;
 }
 
+//Call during a key press event
 void main_menu::on_event(engine::event& event) {
 	if (event.event_type() == engine::event_type_e::key_pressed)
 	{
@@ -155,7 +157,7 @@ void main_menu::on_event(engine::event& event) {
 	}
 	
 }
-
+//Add one of the valid keys to a target string.
 void main_menu::apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character) {
 	if (erase_character == false) {
 		if (target.size() < 20) {
@@ -168,7 +170,7 @@ void main_menu::apply_pressed_key(std::string& target, std::string pressed_key, 
 		}
 	}
 }
-
+//Handle menu state switching upon pressing the enter key
 void main_menu::confirm_selection() {
 	if (m_menu_state == state_title_screen) {
 		if (m_current_menu_choice == 0) {
@@ -253,12 +255,13 @@ void main_menu::confirm_selection() {
 		}
 	}
 }
-
+// Switch menu state and reset the poisition of selection cursor
 void main_menu::switch_menu(int menu_choice) {
 	m_menu_state = menu_choice;
 	m_current_menu_choice = 0;
 }
 
+// Call to render menu images and text
 void main_menu::on_render(engine::ref<engine::shader> image_shader, engine::ref<engine::shader> text_shader) {
 
 	glm::mat4 menu_transform(1.0f);
@@ -312,6 +315,7 @@ void main_menu::on_render(engine::ref<engine::shader> image_shader, engine::ref<
 	}
 }
 
+// Set all names to <Empty>
 void main_menu::reset_multiplayer_names() {
 	m_p1_name = "<Empty>";
 	m_p2_name = "<Empty>";
@@ -319,6 +323,7 @@ void main_menu::reset_multiplayer_names() {
 	m_p4_name = "<Empty>";
 }
 
+// Create pointer to class
 engine::ref<main_menu> main_menu::create() {
 	return std::make_shared<main_menu>();
 }
