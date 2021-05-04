@@ -12,6 +12,8 @@ public:
 	void on_render(engine::ref<engine::shader> shader);
 	void on_event(engine::event& event);
 
+	void initialize_tanks();
+
 	static engine::ref<level> create();
 
 private:

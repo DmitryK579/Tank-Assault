@@ -4,14 +4,14 @@
 
 class player_tank {
 public:
-	player_tank();
+	player_tank(int player_id);
 	~player_tank();
 
 	void on_update(const engine::timestep& time_step);
 	void on_render(engine::ref<engine::shader> shader);
 	void on_event(engine::event& event);
 
-	static engine::ref<player_tank> create();
+	static engine::ref<player_tank> create(int player_id);
 private:
 	engine::ref<sprite> m_chassis_sprite;
 	engine::ref<sprite> m_turret_sprite;

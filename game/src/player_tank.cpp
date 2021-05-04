@@ -1,7 +1,7 @@
 #include "player_tank.h"
 #include "engine/events/key_event.h"
 
-player_tank::player_tank() {
+player_tank::player_tank(int player_id) {
 
 	// Initialize tank characteristics
 	m_position = glm::vec2(.0f, .0f);
@@ -13,13 +13,13 @@ player_tank::player_tank() {
 	// Initialize tank sprites and animation
 	m_chassis_sprite = sprite::create("assets/textures/lightvehicles.png", 26, 26);
 	for (int i = 0; i < 4; i++) {
-		m_chassis_sprite->add_frame_quad(26, 26, i, 0);
+		m_chassis_sprite->add_frame_quad(26, 26, i, player_id);
 	}
 	m_chassis_sprite->set_frame_time(0.05f);
 	m_chassis_sprite->set_animating(true);
 
 	m_turret_sprite = sprite::create("assets/textures/turrets.png", 42, 42);
-	m_turret_sprite->add_frame_quad(42, 42, 2, 0);
+	m_turret_sprite->add_frame_quad(42, 42, 2, player_id);
 
 }
 
@@ -81,7 +81,7 @@ void player_tank::on_event(engine::event& event) {
 }
 
 // Create pointer to class
-engine::ref<player_tank> player_tank::create()
+engine::ref<player_tank> player_tank::create(int player_id)
 {
-	return std::make_shared<player_tank>();
+	return std::make_shared<player_tank>(player_id);
 }

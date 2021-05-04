@@ -22,11 +22,14 @@ level::level() {
 
 	m_terrain->build_layout(28, 16, m_level_1_terrain_sequence);
 
-	m_player_tank = player_tank::create();
 }
 
 level::~level() {
 
+}
+
+void level::initialize_tanks() {
+	m_player_tank = player_tank::create(0);
 }
 
 void level::on_update(const engine::timestep& time_step) {

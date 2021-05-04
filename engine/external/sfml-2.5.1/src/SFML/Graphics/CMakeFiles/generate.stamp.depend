@@ -1,0 +1,3 @@
+# CMake generation dependency list for this directory.
+C:/sdk/SFML-2.5.1-source/cmake/Modules/FindFreetype.cmake
+C:/sdk/SFML-2.5.1-source/src/SFML/Graphics/CMakeLists.txt

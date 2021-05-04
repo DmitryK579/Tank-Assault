@@ -55,6 +55,7 @@ void application_layer::on_update(const engine::timestep& time_step)
 		m_in_menu = m_main_menu->on_update(time_step);
 		if (!m_in_menu) {
 			m_in_level = true;
+			m_level->initialize_tanks();
 		}
 	}
 	else if (m_in_level){
