@@ -55,14 +55,14 @@ main_menu::main_menu() {
 	// Create menu sprites and positions
 	int menu_states = 7;
 
-	m_selection_arrow = sprite::create("assets/textures/arrow.png", 40, 40, 1, 0.f);
-	engine::ref<sprite> main_menu = sprite::create("assets/textures/MainMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> options_menu = sprite::create("assets/textures/OptionsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> controls_menu = sprite::create("assets/textures/ControlsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> volume_menu = sprite::create("assets/textures/VolumeMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> multiplayer_menu = sprite::create("assets/textures/MultiplayerMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> multiplayer_join_menu = sprite::create("assets/textures/MultiplayerJoinMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
-	engine::ref<sprite> multiplayer_session_menu = sprite::create("assets/textures/MultiplayerSessionMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height(), 1, 0.f);
+	m_selection_arrow = sprite::create("assets/textures/arrow.png", 40, 40);
+	engine::ref<sprite> main_menu = sprite::create("assets/textures/MainMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> options_menu = sprite::create("assets/textures/OptionsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> controls_menu = sprite::create("assets/textures/ControlsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> volume_menu = sprite::create("assets/textures/VolumeMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> multiplayer_menu = sprite::create("assets/textures/MultiplayerMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> multiplayer_join_menu = sprite::create("assets/textures/MultiplayerJoinMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
+	engine::ref<sprite> multiplayer_session_menu = sprite::create("assets/textures/MultiplayerSessionMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
 
 	m_menu_sprites.push_back(main_menu);
 	m_menu_sprites.push_back(options_menu);
@@ -100,8 +100,8 @@ main_menu::~main_menu() {
 
 }
 
-void main_menu::on_update() {
-
+bool main_menu::on_update() {
+	return m_in_menu;
 }
 
 void main_menu::on_event(engine::event& event) {
@@ -172,7 +172,7 @@ void main_menu::apply_pressed_key(std::string& target, std::string pressed_key, 
 void main_menu::confirm_selection() {
 	if (m_menu_state == state_title_screen) {
 		if (m_current_menu_choice == 0) {
-
+			m_in_menu = false;
 		}
 		if (m_current_menu_choice == 1) {
 			switch_menu(state_multiplayer_menu);

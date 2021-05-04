@@ -133,17 +133,23 @@
   <ItemGroup>
     <ClInclude Include="src\cross_fade.h" />
     <ClInclude Include="src\application_layer.h" />
+    <ClInclude Include="src\level.h" />
     <ClInclude Include="src\main_menu.h" />
+    <ClInclude Include="src\player_tank.h" />
     <ClInclude Include="src\quad.h" />
     <ClInclude Include="src\sprite.h" />
+    <ClInclude Include="src\terrain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\cross_fade.cpp" />
     <ClCompile Include="src\application_layer.cpp" />
     <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\level.cpp" />
     <ClCompile Include="src\main_menu.cpp" />
+    <ClCompile Include="src\player_tank.cpp" />
     <ClCompile Include="src\quad.cpp" />
     <ClCompile Include="src\sprite.cpp" />
+    <ClCompile Include="src\terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\engine\engine.vcxproj">

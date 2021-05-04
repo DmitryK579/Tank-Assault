@@ -10,7 +10,7 @@ public:
 
 	void confirm_selection();
 	void switch_menu(int menu_choice);
-	void on_update();
+	bool on_update();
 	void on_render(engine::ref<engine::shader> image_shader, engine::ref<engine::shader> text_shader);
 	void on_event(engine::event& event);
 	static engine::ref<main_menu> create();

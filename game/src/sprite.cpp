@@ -2,27 +2,18 @@
 #include "sprite.h"
 #include "quad.h"
 
-sprite::sprite(const std::string& path, float width, float height, int frames, float frame_time)
+sprite::sprite(const std::string& path, float width, float height)
 {
-	m_texture = engine::texture_2d::create(path, true);
+	m_main_image = engine::texture_2d::create(path, true);
 	m_transparency = 1.0f;
 	m_scale = glm::vec2(1.f, 1.f);
 	m_current_frame = 1;
-	m_total_frames = frames;
+	m_total_frames = 1;
 	m_timer = 0.f;
-	m_frame_time = frame_time;
-	if (frame_time > 0) {
-		m_is_animating = true;
-	}
-	else {
-		m_is_animating = false;
-	}
+	m_frame_time = 0.0f;
+	m_is_animating = false;
 
-	float image_step = 1.0f / (float)frames;
-	for (int i = 0; i < frames; i++) {
-		engine::ref<quad> quad = quad::create(glm::vec2(width, height), glm::vec2(i * image_step, i * image_step + image_step), glm::vec2(0.f, 1.f));
-		m_quads.push_back(quad);
-	}
+	m_main_image_quad = quad::create(glm::vec2(width, height), glm::vec2(0.f, 1.f), glm::vec2(0.f, 1.f));	
 }
 
 sprite::~sprite()
@@ -47,25 +38,39 @@ void sprite::on_render(glm::mat4 transform, engine::ref<engine::shader> shader)
 {
 	transform = glm::scale(transform, glm::vec3(m_scale.x, m_scale.y, 1.f));
 	std::dynamic_pointer_cast<engine::gl_shader>(shader)->set_uniform("transparency", m_transparency);
-	m_texture->bind();
-	int index = m_current_frame - 1;
-	engine::renderer::submit(shader, m_quads[index]->mesh(), transform);
+	m_main_image->bind();
+	if (m_total_frames == 1) {
+		engine::renderer::submit(shader, m_main_image_quad->mesh(), transform);
+	}
+	else if (m_total_frames > 1) {
+		int index = m_current_frame - 1;
+		engine::renderer::submit(shader, m_frame_quads[index]->mesh(), transform);
+	}
 	std::dynamic_pointer_cast<engine::gl_shader>(shader)->set_uniform("transparency", 1.0f);
 }
 
-void sprite::create_sprite_quad(int sprite_size_x, int sprite_size_y, int horizontal_sprite_square, int vertical_sprite_square) {
-	float image_step_x = m_texture->width() / sprite_size_x;
-	float image_step_y = m_texture->height() / sprite_size_y;
+void sprite::add_frame_quad(int sprite_size_x, int sprite_size_y, int horizontal_frame_square, int vertical_frame_square) {
+	float image_step_x = 1.0f/(m_main_image->width() / sprite_size_x);
+	float image_step_y = 1.0f/(m_main_image->height() / sprite_size_y);
 
 	engine::ref<quad> quad = quad::create(glm::vec2(sprite_size_x, sprite_size_y),
-		glm::vec2(horizontal_sprite_square * image_step_x, horizontal_sprite_square * image_step_x + image_step_x),
-		glm::vec2(vertical_sprite_square * image_step_y, vertical_sprite_square * image_step_y + image_step_y));
+		glm::vec2(horizontal_frame_square * image_step_x, horizontal_frame_square * image_step_x + image_step_x),
+		glm::vec2(1.0f-(vertical_frame_square * image_step_y), 1.0f-(vertical_frame_square * image_step_y + image_step_y)));
 
-	m_quads.push_back(quad);
-
+	m_frame_quads.push_back(quad);
+	m_total_frames += 1;
 }
 
-engine::ref<sprite> sprite::create(const std::string& path, float width, float height, int frames, float frame_time)
+void sprite::set_current_frame(int frame) {
+	if (frame <= m_total_frames && frame > 0) {
+		m_current_frame = frame;
+	}
+	else {
+		m_current_frame = 1;
+	}
+}
+
+engine::ref<sprite> sprite::create(const std::string& path, float width, float height)
 {
-	return std::make_shared<sprite>(path, width, height, frames, frame_time);
+	return std::make_shared<sprite>(path, width, height);
 }

@@ -56,6 +56,8 @@ application_layer::application_layer()
 	// Initialize main menu
 	m_main_menu = main_menu::create();
 	m_in_menu = true;
+
+	m_level = level::create();
 }
 
 application_layer::~application_layer() {}
@@ -70,7 +72,7 @@ void application_layer::on_update(const engine::timestep& time_step)
 
 	//m_sprite->on_update(time_step);
 
-	m_main_menu->on_update();
+	m_in_menu = m_main_menu->on_update();
 } 
 
 void application_layer::on_render() 
@@ -87,12 +89,16 @@ void application_layer::on_render()
 	//m_sprite->on_render(transform, textured_lighting_shader);
 
 	const auto text_shader = engine::renderer::shaders_library()->get("text_2D");
-	m_main_menu->on_render(textured_lighting_shader, text_shader);
+	if (m_in_menu) {
+		m_main_menu->on_render(textured_lighting_shader, text_shader);
 
+	}
+	else {
+		m_level->on_render(textured_lighting_shader);
+	}
 	engine::renderer::end_scene();
-
 	// Render text
-	m_text_manager->render_text(text_shader, "Orange Text", 10.f, (float)engine::application::window().height()-25.f, 0.5f, glm::vec4(1.f, 0.5f, 0.f, 1.f));
+	// m_text_manager->render_text(text_shader, "Orange Text", 10.f, (float)engine::application::window().height()-25.f, 0.5f, glm::vec4(1.f, 0.5f, 0.f, 1.f));
 } 
 
 void application_layer::on_event(engine::event& event) 
@@ -106,7 +112,7 @@ void application_layer::on_event(engine::event& event)
 			auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 			if (e.key_code() == engine::key_codes::KEY_TAB)
 			{
-				//engine::render_command::toggle_wireframe();
+				engine::render_command::toggle_wireframe();
 			}
 		}
     } 
