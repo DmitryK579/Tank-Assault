@@ -100,7 +100,7 @@ main_menu::~main_menu() {
 
 }
 
-bool main_menu::on_update() {
+bool main_menu::on_update(const engine::timestep& time_step) {
 	return m_in_menu;
 }
 

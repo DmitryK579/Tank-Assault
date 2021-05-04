@@ -72,7 +72,12 @@ void application_layer::on_update(const engine::timestep& time_step)
 
 	//m_sprite->on_update(time_step);
 
-	m_in_menu = m_main_menu->on_update();
+	if (m_in_menu) {
+		m_in_menu = m_main_menu->on_update(time_step);
+	}
+	else {
+		m_level->on_update(time_step);
+	}
 } 
 
 void application_layer::on_render() 
@@ -109,6 +114,7 @@ void application_layer::on_event(engine::event& event)
 			m_main_menu->on_event(event);
 		}
 		else {
+			m_level->on_event(event);
 			auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 			if (e.key_code() == engine::key_codes::KEY_TAB)
 			{

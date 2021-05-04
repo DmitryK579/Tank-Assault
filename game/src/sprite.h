@@ -13,6 +13,12 @@ public:
 	void on_render(glm::mat4 transform, engine::ref<engine::shader> shader);
 	void add_frame_quad(int sprite_size_x, int sprite_size_y, int horizontal_frame_square, int vertical_frame_square);
 
+	void set_scale(glm::vec2 scale) { m_scale = scale; }
+	glm::vec2 get_scale() { return m_scale; }
+
+	void set_transparency(float value) { m_transparency = value; }
+	float get_transparency() { return m_transparency; }
+
 	void set_current_frame(int frame);
 	int get_current_frame() { return m_current_frame; }
 

@@ -8,7 +8,7 @@ sprite::sprite(const std::string& path, float width, float height)
 	m_transparency = 1.0f;
 	m_scale = glm::vec2(1.f, 1.f);
 	m_current_frame = 1;
-	m_total_frames = 1;
+	m_total_frames = 0;
 	m_timer = 0.f;
 	m_frame_time = 0.0f;
 	m_is_animating = false;
@@ -39,10 +39,10 @@ void sprite::on_render(glm::mat4 transform, engine::ref<engine::shader> shader)
 	transform = glm::scale(transform, glm::vec3(m_scale.x, m_scale.y, 1.f));
 	std::dynamic_pointer_cast<engine::gl_shader>(shader)->set_uniform("transparency", m_transparency);
 	m_main_image->bind();
-	if (m_total_frames == 1) {
+	if (m_total_frames == 0) {
 		engine::renderer::submit(shader, m_main_image_quad->mesh(), transform);
 	}
-	else if (m_total_frames > 1) {
+	else if (m_total_frames > 0) {
 		int index = m_current_frame - 1;
 		engine::renderer::submit(shader, m_frame_quads[index]->mesh(), transform);
 	}
@@ -55,7 +55,7 @@ void sprite::add_frame_quad(int sprite_size_x, int sprite_size_y, int horizontal
 
 	engine::ref<quad> quad = quad::create(glm::vec2(sprite_size_x, sprite_size_y),
 		glm::vec2(horizontal_frame_square * image_step_x, horizontal_frame_square * image_step_x + image_step_x),
-		glm::vec2(1.0f-(vertical_frame_square * image_step_y), 1.0f-(vertical_frame_square * image_step_y + image_step_y)));
+		glm::vec2(1.0f-(vertical_frame_square * image_step_y + image_step_y), 1.0f - (vertical_frame_square * image_step_y)));
 
 	m_frame_quads.push_back(quad);
 	m_total_frames += 1;
