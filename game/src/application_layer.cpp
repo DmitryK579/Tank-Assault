@@ -55,7 +55,7 @@ application_layer::~application_layer() {}
 
 void application_layer::on_update(const engine::timestep& time_step) 
 {
-
+	m_network->on_update(time_step);
 	if (m_in_menu) {
 		m_in_menu = m_main_menu->on_update(time_step);
 

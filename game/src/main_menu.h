@@ -19,7 +19,6 @@ public:
 
 private:
 	void apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character);
-	void reset_multiplayer_names();
 	engine::ref<engine::text_manager>				m_text_manager{};
 	engine::ref<sprite>								m_selection_arrow{};
 	engine::ref<sprite>								m_sprite{};
@@ -49,11 +48,6 @@ private:
 	std::string										m_player_name;
 	std::string										m_ip_address;
 	std::string										m_port;
-
-	std::string										m_p1_name;
-	std::string										m_p2_name;
-	std::string										m_p3_name;
-	std::string										m_p4_name;
 
 	engine::ref<network>							m_network_ref;
 };

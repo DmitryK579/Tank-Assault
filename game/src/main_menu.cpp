@@ -9,7 +9,6 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 
 	// Initialize menu variables
 	m_player_name = "PLAYER";
-	reset_multiplayer_names();
 	m_ip_address = "127.0.0.1";
 	m_port = "5029";
 	m_text_colour_normal = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -230,7 +229,7 @@ void main_menu::confirm_selection() {
 		}
 		if (m_current_menu_choice == 1) {
 			switch_menu(state_multiplayer_session_menu);
-			m_p1_name = m_player_name;
+			m_network_ref->create_server(m_player_name);
 		}
 		if (m_current_menu_choice == 2) {
 			switch_menu(state_multiplayer_join_menu);
@@ -247,6 +246,9 @@ void main_menu::confirm_selection() {
 			m_entering_text = true;
 		}
 		if (m_current_menu_choice == 2) {
+			sf::IpAddress ip = m_ip_address;
+			unsigned short port = static_cast<unsigned short>(std::stoul(m_port));
+			m_network_ref->join_server(ip,port);
 			switch_menu(state_multiplayer_session_menu);
 		}
 		if (m_current_menu_choice == 3) {
@@ -259,7 +261,7 @@ void main_menu::confirm_selection() {
 		}
 		if (m_current_menu_choice == 1) {
 			switch_menu(state_multiplayer_menu);
-			reset_multiplayer_names();
+			m_network_ref->leave_server();
 		}
 	}
 }
@@ -309,26 +311,18 @@ void main_menu::on_render(engine::ref<engine::shader> image_shader, engine::ref<
 	else if (m_menu_state == state_multiplayer_session_menu) {
 		glm::vec3 colour = m_text_colour_normal;
 
-		m_text_manager->render_text(text_shader, m_p1_name, (float)engine::application::window().width() / 2 - 230.f,
+		m_text_manager->render_text(text_shader, m_network_ref->get_player_name(0), (float)engine::application::window().width() / 2 - 230.f,
 			(float)engine::application::window().height() / 2 + 115.f, 0.75f, glm::vec4(1.f, colour.x, colour.y, colour.z));
 
-		m_text_manager->render_text(text_shader, m_p2_name, (float)engine::application::window().width() / 2 - 230.f,
+		m_text_manager->render_text(text_shader, m_network_ref->get_player_name(1), (float)engine::application::window().width() / 2 - 230.f,
 			(float)engine::application::window().height() / 2 + 60.f, 0.75f, glm::vec4(1.f, colour.x, colour.y, colour.z));
 
-		m_text_manager->render_text(text_shader, m_p3_name, (float)engine::application::window().width() / 2 - 230.f,
+		m_text_manager->render_text(text_shader, m_network_ref->get_player_name(2), (float)engine::application::window().width() / 2 - 230.f,
 			(float)engine::application::window().height() / 2 + 5.f, 0.75f, glm::vec4(1.f, colour.x, colour.y, colour.z));
 
-		m_text_manager->render_text(text_shader, m_p4_name, (float)engine::application::window().width() / 2 - 230.f,
+		m_text_manager->render_text(text_shader, m_network_ref->get_player_name(3), (float)engine::application::window().width() / 2 - 230.f,
 			(float)engine::application::window().height() / 2 - 50.f, 0.75f, glm::vec4(1.f, colour.x, colour.y, colour.z));
 	}
-}
-
-// Set all names to <Empty>
-void main_menu::reset_multiplayer_names() {
-	m_p1_name = "<Empty>";
-	m_p2_name = "<Empty>";
-	m_p3_name = "<Empty>";
-	m_p4_name = "<Empty>";
 }
 
 // Create pointer to class
