@@ -1,10 +1,11 @@
 #pragma once
 #include <engine.h>
 #include "sprite.h"
+#include "network.h"
 
 class main_menu {
 public:
-	main_menu();
+	main_menu(engine::ref<network> network_ref);
 	~main_menu();
 
 
@@ -13,7 +14,8 @@ public:
 	bool on_update(const engine::timestep& time_step);
 	void on_render(engine::ref<engine::shader> image_shader, engine::ref<engine::shader> text_shader);
 	void on_event(engine::event& event);
-	static engine::ref<main_menu> create();
+
+	static engine::ref<main_menu> create(engine::ref<network> network_ref);
 
 private:
 	void apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character);
@@ -24,10 +26,13 @@ private:
 	std::vector<engine::ref<sprite>>				m_menu_sprites{};
 	std::map<int32_t,std::string>					m_valid_keys{};
 
-	bool											m_in_menu = true;
-	bool											m_entering_text = false;
-	int												m_menu_state = 0;
-	int												m_current_menu_choice = 0;
+	bool											m_in_menu;
+	bool											m_entering_text;
+	bool											m_is_hostring_server;
+	bool											m_is_joining_server;
+
+	int												m_menu_state;
+	int												m_current_menu_choice;
 	std::vector<std::vector<glm::vec2>>				m_selection_arrow_positions;
 	std::vector<int>								m_menu_choices;
 	glm::vec3										m_text_colour_normal;
@@ -49,4 +54,6 @@ private:
 	std::string										m_p2_name;
 	std::string										m_p3_name;
 	std::string										m_p4_name;
+
+	engine::ref<network>							m_network_ref;
 };

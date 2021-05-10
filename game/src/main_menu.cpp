@@ -1,7 +1,9 @@
 #include "main_menu.h"
 #include "engine/events/key_event.h"
 
-main_menu::main_menu() {
+main_menu::main_menu(engine::ref<network> network_ref) {
+	m_network_ref = network_ref;
+
 	// Create text manager
 	m_text_manager = engine::text_manager::create();
 
@@ -9,9 +11,15 @@ main_menu::main_menu() {
 	m_player_name = "PLAYER";
 	reset_multiplayer_names();
 	m_ip_address = "127.0.0.1";
-	m_port = "1234";
+	m_port = "5029";
 	m_text_colour_normal = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_text_colour_entering = glm::vec3(0.5f, 0.f, 1.0f);
+	m_in_menu = true;
+	m_entering_text = false;
+	m_is_hostring_server = false;
+	m_is_joining_server = false;
+	m_menu_state = state_title_screen;
+	m_current_menu_choice = 0;
 	m_valid_keys = {
 		{engine::key_codes::KEY_0, "0"},
 		{engine::key_codes::KEY_1, "1"},
@@ -324,6 +332,6 @@ void main_menu::reset_multiplayer_names() {
 }
 
 // Create pointer to class
-engine::ref<main_menu> main_menu::create() {
-	return std::make_shared<main_menu>();
+engine::ref<main_menu> main_menu::create(engine::ref<network> network_ref) {
+	return std::make_shared<main_menu>(network_ref);
 }

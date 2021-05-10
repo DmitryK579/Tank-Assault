@@ -1,6 +1,8 @@
 #include "level.h"
 
-level::level() {
+level::level(engine::ref<network> network_ref) {
+	m_network_ref = network_ref;
+
 	m_terrain = terrain::create("assets/textures/gametiles.png");
 	m_level_1_terrain_sequence = {
 		{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},
@@ -45,7 +47,7 @@ void level::on_event(engine::event& event) {
 	m_player_tank->on_event(event);
 }
 
-engine::ref<level> level::create()
+engine::ref<level> level::create(engine::ref<network> network_ref)
 {
-	return std::make_shared<level>();
+	return std::make_shared<level>(network_ref);
 }

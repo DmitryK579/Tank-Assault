@@ -38,12 +38,17 @@ application_layer::application_layer()
 	
 	m_text_manager = engine::text_manager::create();
 
+	// Initialize network variables
+	m_network = network::create();
+
 	// Initialize main menu
-	m_main_menu = main_menu::create();
+	m_main_menu = main_menu::create(m_network);
 	m_in_menu = true;
 
-	m_level = level::create();
+	// Initialize game level class
+	m_level = level::create(m_network);
 	m_in_level = false;
+
 }
 
 application_layer::~application_layer() {}
@@ -53,6 +58,7 @@ void application_layer::on_update(const engine::timestep& time_step)
 
 	if (m_in_menu) {
 		m_in_menu = m_main_menu->on_update(time_step);
+
 		if (!m_in_menu) {
 			m_in_level = true;
 			m_level->initialize_tanks();

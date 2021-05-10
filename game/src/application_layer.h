@@ -3,6 +3,7 @@
 #include "sprite.h"
 #include "main_menu.h"
 #include "level.h"
+#include "network.h"
 
 class application_layer : public engine::layer
 {
@@ -26,4 +27,6 @@ private:
 
 	engine::ref<level>					m_level{};
 	bool								m_in_level;
+
+	engine::ref<network>				m_network{};
 };
