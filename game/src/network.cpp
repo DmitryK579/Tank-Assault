@@ -13,7 +13,7 @@ network::network() {
 	m_is_host = false;
 	m_accepting_clients = false;
 	m_is_active = false;
-	m_user_id = -1;
+	m_user_id = 255;
 	m_max_players = 4;
 	m_empty_name = "<Empty>";
 	m_separation_marker = ';';
@@ -40,7 +40,7 @@ void network::recieve_messages() {
 
 void network::process_message(const message_struct& message, const sf::IpAddress& sender, const unsigned short& port) {
 
-	if (message.sender_id == -1) {
+	if (message.sender_id == 255) {
 		message_struct response;
 		response.sender_id = m_user_id;
 		if (message.message_id == id_request_join) {
@@ -109,7 +109,7 @@ void network::join_server(sf::IpAddress ip_address, unsigned short port) {
 }
 
 void network::leave_server() {
-	m_user_id = -1;
+	m_user_id = 255;
 	m_is_host = false;
 	m_is_active = false;
 	m_accepting_clients = false;
