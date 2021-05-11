@@ -11,6 +11,7 @@ sf::Packet& operator >>(sf::Packet& packet, network::message_struct& message) {
 network::network() {
 	m_server_port = 5029;
 	m_is_host = false;
+	m_connection_step = 0;
 	m_accepting_clients = false;
 	m_is_active = false;
 	m_user_id = 255;
@@ -21,6 +22,7 @@ network::network() {
 		m_player_names.push_back(m_empty_name);
 	}
 	m_public_ip_address = sf::IpAddress::getPublicAddress().toString();
+	m_local_ip_address = sf::IpAddress::getLocalAddress().toString();
 }
 network::~network() {
 
@@ -32,7 +34,10 @@ void network::recieve_messages() {
 		unsigned short port;
 		message_struct message;
 		sf::Packet recieved_packet;
-		m_socket.receive(recieved_packet,sender,port);
+		if (m_socket.receive(recieved_packet, sender, port) != sf::Socket::Done) {
+			//error
+			break;
+		}
 		recieved_packet >> message;
 		process_message(message,sender,port);
 	}
@@ -48,6 +53,7 @@ void network::process_message(const message_struct& message, const sf::IpAddress
 			if (m_accepting_clients) {
 				m_new_client_queue.push_back({ sender,port });
 				response.message_body = "y";
+				m_connection_step = step_request_name;
 			}
 			else {
 				response.message_body = "n";
@@ -60,20 +66,27 @@ void network::process_message(const message_struct& message, const sf::IpAddress
 		case id_request_join_response:
 			if (message.message_body == "y") {
 				m_valid_connections.push_back({ sender,port });
+				m_connection_step = step_request_id;
+			}
+			else {
+				leave_server();
 			}
 			break;
 
 		case id_user_id_assignment:
 		{
 			m_user_id = stoi(message.message_body);
-			message_struct response = { m_user_id,id_player_name,m_player_name };
-			send_message(response, sender, port);
+			if (m_connection_step != step_ready) {
+				send_user_name(sender, port);
+				m_connection_step = step_request_all_names;
+			}
 			break;
 		}
 
 		case id_player_name:
 			m_player_names[message.sender_id] = message.message_body;
 			send_all_player_names();
+			m_connection_step = step_ready;
 			break;
 
 		case id_all_player_names:
@@ -82,9 +95,24 @@ void network::process_message(const message_struct& message, const sf::IpAddress
 			for (int i = 0; i < all_names.size(); i++) {
 				m_player_names[i] = all_names[i];
 			}
+			m_connection_step = step_ready;
 			break;
 		}
 		case id_ping:
+			break;
+
+		case id_leave:
+			if (message.sender_id == 0) {
+				m_valid_connections.clear();
+				leave_server();
+			}
+			else {
+				disconnect_player(message.sender_id);
+			}
+			break;
+
+		case id_kick:
+
 			break;
 		}
 	}
@@ -106,12 +134,18 @@ void network::join_server(sf::IpAddress ip_address, unsigned short port, std::st
 	m_player_name = player_name;
 	m_socket.bind(port);
 	m_is_active = true;
+	m_connection_step = step_request_connect;
 	m_communication_thread = new std::thread (&network::recieve_messages,this);
 	message_struct message = { m_user_id,id_request_join,""};
 	send_message(message, ip_address, m_server_port);
 }
 
 void network::leave_server() {
+	message_struct message = { m_user_id, id_leave, "" };
+	for (int i = 0; i < m_valid_connections.size(); i++) {
+		send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
+	}
+	m_connection_step = 0;
 	m_user_id = 255;
 	m_is_host = false;
 	m_is_active = false;
@@ -148,10 +182,23 @@ void network::assign_new_user_id() {
 	}
 }
 
+void network::reassign_id_of_existing_users() {
+	message_struct message = { m_user_id,id_user_id_assignment,"" };
+	for (int i = 0; i < m_valid_connections.size(); i++) {
+		message.message_body = std::to_string(i + 1);
+		send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
+	}
+}
+
 void network::send_message(const message_struct& message, const sf::IpAddress& ip, const unsigned short& port) {
 	sf::Packet packet;
 	packet << message;
 	m_socket.send(packet, ip, port);
+}
+
+void network::send_user_name(sf::IpAddress ip, unsigned short port) {
+	message_struct response = { m_user_id,id_player_name,m_player_name };
+	send_message(response, ip, port);
 }
 
 void network::send_all_player_names() {
@@ -174,6 +221,18 @@ std::vector<std::string> network::split_string(const std::string& string) {
 		string_vector.push_back(segment);
 	}
 	return string_vector;
+}
+
+void network::disconnect_player(int id) {
+	m_valid_connections.erase(m_valid_connections.begin()+id-1);
+	for (int i = id; i < m_player_names.size()-1; i++) {
+		m_player_names[i] = m_player_names[i + 1];
+	}
+	m_player_names[m_max_players - 1] = m_empty_name;
+	if (m_valid_connections.size() > 0) {
+		send_all_player_names();
+		reassign_id_of_existing_users();
+	}
 }
 
 void network::reset_player_names() {

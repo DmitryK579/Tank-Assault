@@ -109,6 +109,11 @@ main_menu::~main_menu() {
 
 //Call each frame
 bool main_menu::on_update(const engine::timestep& time_step) {
+	if (m_menu_state == state_multiplayer_session_menu) {
+		if (m_network_ref->get_is_active() == false) {
+			switch_menu(state_multiplayer_menu);
+		}
+	}
 	return m_in_menu;
 }
 
