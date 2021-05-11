@@ -10,7 +10,7 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 	// Initialize menu variables
 	m_player_name = "PLAYER";
 	m_ip_address = "127.0.0.1";
-	m_port = "5029";
+	m_port = "5020";
 	m_text_colour_normal = glm::vec3(1.0f, 1.0f, 1.0f);
 	m_text_colour_entering = glm::vec3(0.5f, 0.f, 1.0f);
 	m_in_menu = true;
@@ -248,7 +248,7 @@ void main_menu::confirm_selection() {
 		if (m_current_menu_choice == 2) {
 			sf::IpAddress ip = m_ip_address;
 			unsigned short port = static_cast<unsigned short>(std::stoul(m_port));
-			m_network_ref->join_server(ip,port);
+			m_network_ref->join_server(ip,port,m_player_name);
 			switch_menu(state_multiplayer_session_menu);
 		}
 		if (m_current_menu_choice == 3) {

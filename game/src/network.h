@@ -16,7 +16,7 @@ public:
 
 	void recieve_messages();
 	void create_server(std::string player_name);
-	void join_server(sf::IpAddress ip_address, unsigned short port);
+	void join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name);
 	void leave_server();
 
 	void on_update(const engine::timestep& time_step);
@@ -26,11 +26,13 @@ public:
 	void set_user_id(int id) { m_user_id = id; }
 	int	 get_user_id() { return m_user_id; }
 
-	void set_port(unsigned short port) { m_port = port; }
-	unsigned short get_port() { return m_port; }
+	void set_user_port(unsigned short port) { m_user_port = port; }
+	unsigned short get_port() { return m_user_port; }
 
 	void set_is_host(bool state) { m_is_host = state; }
 	bool get_is_host() { return m_is_host; }
+
+	std::string get_public_ip() { return m_public_ip_address; }
 
 	std::string get_player_name(int index) { return m_player_names[index]; }
 
@@ -45,14 +47,15 @@ private:
 
 	int m_max_players;
 	int m_user_id;
-	unsigned short m_port;
+	unsigned short m_server_port;
+	unsigned short m_user_port;
 	std::string m_empty_name;
 	std::string m_player_name;
 	char m_separation_marker;
 
 	std::string m_public_ip_address;
-	std::vector <sf::IpAddress> m_new_ip_address_queue;
-	std::vector <sf::IpAddress> m_session_ip_addresses;
+	std::vector < std::pair <sf::IpAddress,unsigned short>> m_new_client_queue;
+	std::vector < std::pair <sf::IpAddress, unsigned short>> m_valid_connections;
 	std::vector <std::string> m_player_names;
 	
 	bool m_is_host;
