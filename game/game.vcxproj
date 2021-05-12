@@ -136,22 +136,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\application_layer.h" />
+    <ClInclude Include="src\client.h" />
     <ClInclude Include="src\level.h" />
     <ClInclude Include="src\main_menu.h" />
     <ClInclude Include="src\network.h" />
+    <ClInclude Include="src\network_message.h" />
     <ClInclude Include="src\player_tank.h" />
     <ClInclude Include="src\quad.h" />
+    <ClInclude Include="src\server.h" />
     <ClInclude Include="src\sprite.h" />
     <ClInclude Include="src\terrain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\application_layer.cpp" />
+    <ClCompile Include="src\client.cpp" />
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\level.cpp" />
     <ClCompile Include="src\main_menu.cpp" />
     <ClCompile Include="src\network.cpp" />
+    <ClCompile Include="src\network_message.cpp" />
     <ClCompile Include="src\player_tank.cpp" />
     <ClCompile Include="src\quad.cpp" />
+    <ClCompile Include="src\server.cpp" />
     <ClCompile Include="src\sprite.cpp" />
     <ClCompile Include="src\terrain.cpp" />
   </ItemGroup>

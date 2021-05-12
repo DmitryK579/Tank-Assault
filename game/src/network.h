@@ -1,5 +1,8 @@
 #pragma once
 #include <engine.h>
+#include "network_message.h"
+#include "server.h"
+#include "client.h"
 #include "SFML/Network.hpp"
 
 class network {
