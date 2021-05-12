@@ -4,6 +4,7 @@ server::server(unsigned short server_port, int max_players) {
 	m_server_port = server_port;
 	m_accepting_clients = false;
 	m_is_active = false;
+	m_is_in_game = false;
 	m_user_id = 0;
 	m_max_players = 4;
 	m_empty_name = "<Empty>";
@@ -20,13 +21,12 @@ void server::recieve_messages() {
 	while (m_is_active) {
 		sf::IpAddress sender;
 		unsigned short port;
-		network_message::message message;
 		sf::Packet recieved_packet;
 		if (m_socket.receive(recieved_packet, sender, port) != sf::Socket::Done) {
 			//error
 			break;
 		}
-		read_message_from_sfml_packet(recieved_packet,message);
+		network_message::message message = read_message_from_sfml_packet(recieved_packet);
 		process_message(message, sender, port);
 	}
 }
@@ -42,7 +42,7 @@ void server::process_message(const network_message::message& message, const sf::
 		case network_message::id_player_name:
 			m_player_names[message.sender_id] = message.message_body;
 			send_all_player_names();
-			m_client_connection_steps[message.sender_id] = step_ready;
+			m_client_connection_steps[message.sender_id-1] = step_ready;
 			break;
 
 		case network_message::id_ping:
@@ -59,8 +59,7 @@ void server::process_message(const network_message::message& message, const sf::
 }
 
 void server::send_message(const network_message::message& message, const sf::IpAddress& ip, const unsigned short& port) {
-	sf::Packet packet;
-	write_to_sfml_packet(message, packet);
+	sf::Packet packet = write_to_sfml_packet(message);
 	m_socket.send(packet, ip, port);
 }
 
@@ -76,7 +75,7 @@ void server::respond_to_join_request(const network_message::message& message, co
 			response.message_body = "y";
 			send_new_id = true;
 
-			if (m_valid_connections.size() == m_max_players) {
+			if (m_valid_connections.size() == m_max_players-1) {
 				m_accepting_clients = false;
 			}
 		}
@@ -112,6 +111,9 @@ void server::disconnect_player(int id) {
 	if (m_valid_connections.size() > 0) {
 		send_all_player_names();
 		reassign_id_of_existing_users();
+	}
+	if (!m_is_in_game) {
+		m_accepting_clients = true;
 	}
 }
 
@@ -158,12 +160,16 @@ void server::close_server() {
 	reset_player_names();
 }
 
-void server::write_to_sfml_packet(const network_message::message& message, sf::Packet& packet) {
+sf::Packet server::write_to_sfml_packet(const network_message::message& message) {
+	sf::Packet packet;
 	packet << message.sender_id << message.message_id << message.message_body;
+	return packet;
 }
 
-void server::read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message) {
+network_message::message server::read_message_from_sfml_packet(sf::Packet& packet) {
+	network_message::message message;
 	packet >> message.sender_id >> message.message_id >> message.message_body;
+	return message;
 }
 
 engine::ref<server> server::create(unsigned short server_port, int max_players)

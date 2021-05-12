@@ -21,7 +21,7 @@ private:
 	engine::ref<terrain> m_terrain;
 	std::vector<std::pair<int,int>> m_level_1_terrain_sequence;
 
-	engine::ref<player_tank> m_player_tank;
+	engine::ref<player_tank> m_player_tank{};
 
-	engine::ref<network> m_network_ref;
+	engine::ref<network> m_network_ref{};
 };

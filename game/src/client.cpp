@@ -2,7 +2,7 @@
 
 client::client(unsigned short server_port) {
 	m_server_port = server_port;
-	m_server_ip = NULL;
+	m_server_ip = "127.0.0.1";
 	m_user_port = 0;
 	m_user_id = 255;
 	m_player_name = "!";
@@ -17,13 +17,12 @@ void client::recieve_messages() {
 	while (m_is_active) {
 		sf::IpAddress sender;
 		unsigned short port;
-		network_message::message message;
 		sf::Packet recieved_packet;
 		if (m_socket.receive(recieved_packet, sender, port) != sf::Socket::Done) {
 			//error
 			break;
 		}
-		read_message_from_sfml_packet(recieved_packet, message);
+		network_message::message message = read_message_from_sfml_packet(recieved_packet);
 		process_message(message, sender, port);
 	}
 }
@@ -64,7 +63,7 @@ void client::process_message(const network_message::message& message, const sf::
 
 		case network_message::id_leave:
 			if (message.sender_id == 0) {
-				m_server_ip = NULL;
+				m_server_ip = "127.0.0.1";
 				leave_server();
 			}
 			break;
@@ -76,8 +75,7 @@ void client::process_message(const network_message::message& message, const sf::
 }
 
 void client::send_message(const network_message::message& message, const sf::IpAddress& ip, const unsigned short& port) {
-	sf::Packet packet;
-	write_to_sfml_packet(message, packet);
+	sf::Packet packet = write_to_sfml_packet(message);
 	m_socket.send(packet, ip, port);
 }
 
@@ -104,16 +102,20 @@ void client::leave_server() {
 	m_user_id = 255;
 	m_is_active = false;
 	m_socket.unbind();
-	m_server_ip = NULL;
+	m_server_ip = "127.0.0.1";
 	m_player_names.clear();
 }
 
-void client::write_to_sfml_packet(const network_message::message& message, sf::Packet& packet) {
+sf::Packet client::write_to_sfml_packet(const network_message::message& message) {
+	sf::Packet packet;
 	packet << message.sender_id << message.message_id << message.message_body;
+	return packet;
 }
 
-void client::read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message) {
+network_message::message client::read_message_from_sfml_packet(sf::Packet& packet) {
+	network_message::message message;
 	packet >> message.sender_id >> message.message_id >> message.message_body;
+	return message;
 }
 
 engine::ref<client> client::create(unsigned short server_port)

@@ -49,5 +49,5 @@ private:
 	std::string										m_ip_address;
 	std::string										m_port;
 
-	engine::ref<network>							m_network_ref;
+	engine::ref<network>							m_network_ref{};
 };

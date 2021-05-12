@@ -14,6 +14,8 @@ public:
 	void join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name);
 	void leave_server();
 
+	std::vector<std::string> get_player_names() { return m_player_names; }
+
 	static engine::ref<client> create(unsigned short server_port);
 
 private:
@@ -21,8 +23,8 @@ private:
 
 	void send_user_name();
 
-	void write_to_sfml_packet(const network_message::message& message, sf::Packet& packet);
-	void read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message);
+	sf::Packet write_to_sfml_packet(const network_message::message& message);
+	network_message::message read_message_from_sfml_packet(sf::Packet& packet);
 
 	int m_user_id;
 	int m_connection_step;

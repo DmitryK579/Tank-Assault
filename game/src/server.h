@@ -14,6 +14,8 @@ public:
 	void launch_server(std::string player_name);
 	void close_server();
 
+	std::vector<std::string> get_player_names() { return m_player_names; }
+
 	static engine::ref<server> create(unsigned short server_port, int max_players);
 
 private:
@@ -27,8 +29,8 @@ private:
 	void reset_player_names();
 	void disconnect_player(int id);
 
-	void write_to_sfml_packet(const network_message::message& message, sf::Packet& packet);
-	void read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message);
+	sf::Packet write_to_sfml_packet(const network_message::message& message);
+	network_message::message read_message_from_sfml_packet(sf::Packet& packet);
 
 	int m_max_players;
 	int m_user_id;
@@ -44,6 +46,7 @@ private:
 
 	bool m_accepting_clients;
 	bool m_is_active;
+	bool m_is_in_game;
 
 	sf::UdpSocket m_socket;
 
