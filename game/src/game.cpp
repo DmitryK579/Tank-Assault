@@ -24,7 +24,8 @@ public:
     } 
 
     bool on_key_pressed(engine::key_pressed_event& event) 
-    { 
+    {
+        /*
         if (event.event_type() == engine::event_type_e::key_pressed) 
         { 
             if (event.key_code() == engine::key_codes::KEY_ESCAPE) 
@@ -32,7 +33,8 @@ public:
                 application::exit(); 
             } 
             //PYRO_TRACE("{0}", static_cast<char>(e.key_code())); 
-        } 
+        }
+        */
         return false; 
     } 
 }; 

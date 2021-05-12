@@ -18,12 +18,14 @@ public:
 	static engine::ref<main_menu> create(engine::ref<network> network_ref);
 
 private:
-	void apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character);
+	void apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character,int character_limit);
 	engine::ref<engine::text_manager>				m_text_manager{};
 	engine::ref<sprite>								m_selection_arrow{};
 	engine::ref<sprite>								m_sprite{};
 	std::vector<engine::ref<sprite>>				m_menu_sprites{};
-	std::map<int32_t,std::string>					m_valid_keys{};
+	std::map<int32_t,std::string>					m_valid_name_keys{};
+	std::map<int32_t, std::string>					m_valid_ip_keys{};
+	std::map<int32_t, std::string>					m_valid_port_keys{};
 
 	bool											m_in_menu;
 	bool											m_entering_text;
@@ -43,7 +45,9 @@ private:
 	const int										state_volume_menu = 3;
 	const int										state_multiplayer_menu = 4;
 	const int										state_multiplayer_join_menu = 5;
-	const int										state_multiplayer_session_menu = 6;
+	const int										state_multiplayer_connection_status = 6;
+	const int										state_multiplayer_lobby_host = 7;
+	const int										state_multiplayer_lobby_client = 8;
 
 	std::string										m_player_name;
 	std::string										m_ip_address;

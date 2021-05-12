@@ -97,6 +97,13 @@ void application_layer::on_event(engine::event& event)
 {
     if(event.event_type() == engine::event_type_e::key_pressed) 
     {
+		auto& e = dynamic_cast<engine::key_pressed_event&>(event);
+		if (e.key_code() == engine::key_codes::KEY_ESCAPE)
+		{
+			m_network->leave_server();
+			engine::application::exit();
+		}
+
 		if (m_in_menu) {
 			// Pass key event type to menu
 			m_main_menu->on_event(event);
@@ -104,7 +111,6 @@ void application_layer::on_event(engine::event& event)
 		else if (m_in_level){
 			// Pass key event type to level entities
 			m_level->on_event(event);
-			auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 			if (e.key_code() == engine::key_codes::KEY_TAB)
 			{
 				engine::render_command::toggle_wireframe();

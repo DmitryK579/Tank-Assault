@@ -1,22 +1,24 @@
 #include "network.h"
 
 network::network() {
+	// Initialize class variables
 	m_server_port = 5029;
 	m_is_host = false;
 	m_is_active = false;
 	m_max_players = 4;
-
-	m_server = server::create(m_server_port, m_max_players);
-	m_client = client::create(m_server_port);
-
 	m_public_ip_address = sf::IpAddress::getPublicAddress().toString();
 	m_local_ip_address = sf::IpAddress::getLocalAddress().toString();
+
+	// Create pointers to server and client classes
+	m_server = server::create(m_server_port, m_max_players);
+	m_client = client::create(m_server_port);
 
 }
 network::~network() {
 
 }
 
+// Launch a new server with provided player name as host.
 void network::create_server(std::string player_name) {
 	m_user_port = m_server_port;
 	m_is_host = true;
@@ -26,6 +28,8 @@ void network::create_server(std::string player_name) {
 	m_server->launch_server(player_name);
 }
 
+// Attempt to join an existing server on given ip address. Also sets the port that the user will be listening on
+// (server port already known).
 void network::join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name) {
 	m_player_name = player_name;
 	m_is_active = true;
@@ -33,21 +37,25 @@ void network::join_server(sf::IpAddress ip_address, unsigned short port, std::st
 	m_client->join_server(ip_address, port, player_name);
 }
 
+// If host, closes the server. If client, disconnects from a server.
 void network::leave_server() {
-	if (m_is_host) {
-		m_is_host = false;
-		m_server->close_server();
+	if (m_is_active) {
+		if (m_is_host) {
+			m_is_host = false;
+			m_server->close_server();
+		}
+		else {
+			m_client->leave_server();
+		}
+		m_is_active = false;
 	}
-	else {
-		m_client->leave_server();
-	}
-	m_is_active = false;
 }
-
+// Call every frame
 void network::on_update(const engine::timestep& time_step) {
 	
 }
 
+// Return name in specified index
 std::string network::get_player_name(int index) {
 	if (m_is_host) {
 		return m_server->get_player_names()[index];
@@ -62,6 +70,7 @@ std::string network::get_player_name(int index) {
 	}
 }
 
+// Return pointer to class.
 engine::ref<network> network::create()
 {
 	return std::make_shared<network>();
