@@ -1,15 +1,7 @@
 #include "server.h"
 
-sf::Packet& operator <<(sf::Packet& packet, const network_message::message& message) {
-	return packet << message.sender_id << message.message_id << message.message_body;
-}
-
-sf::Packet& operator >>(sf::Packet& packet, network_message::message& message) {
-	return packet >> message.sender_id >> message.message_id >> message.message_body;
-}
-
-server::server(unsigned short port) {
-	m_server_port = port;
+server::server(unsigned short server_port, int max_players) {
+	m_server_port = server_port;
 	m_accepting_clients = false;
 	m_is_active = false;
 	m_user_id = 0;
@@ -34,7 +26,7 @@ void server::recieve_messages() {
 			//error
 			break;
 		}
-		recieved_packet >> message;
+		read_message_from_sfml_packet(recieved_packet,message);
 		process_message(message, sender, port);
 	}
 }
@@ -68,12 +60,13 @@ void server::process_message(const network_message::message& message, const sf::
 
 void server::send_message(const network_message::message& message, const sf::IpAddress& ip, const unsigned short& port) {
 	sf::Packet packet;
-	packet << message;
+	write_to_sfml_packet(message, packet);
 	m_socket.send(packet, ip, port);
 }
 
 void server::respond_to_join_request(const network_message::message& message, const sf::IpAddress& sender, const unsigned short& port) {
 	if (message.message_id == network_message::id_request_join) {
+		bool send_new_id = false;
 		network_message::message response;
 		response.sender_id = m_user_id;
 		response.message_id = network_message::id_request_join_response;
@@ -81,6 +74,7 @@ void server::respond_to_join_request(const network_message::message& message, co
 			m_valid_connections.push_back({ sender,port });
 			m_client_connection_steps.push_back(step_request_name);
 			response.message_body = "y";
+			send_new_id = true;
 
 			if (m_valid_connections.size() == m_max_players) {
 				m_accepting_clients = false;
@@ -90,6 +84,9 @@ void server::respond_to_join_request(const network_message::message& message, co
 			response.message_body = "n";
 		}
 		send_message(response, sender, port);
+		if (send_new_id) {
+			assign_id_to_new_user();
+		}
 	}
 }
 
@@ -116,6 +113,13 @@ void server::disconnect_player(int id) {
 		send_all_player_names();
 		reassign_id_of_existing_users();
 	}
+}
+
+void server::assign_id_to_new_user() {
+	size_t connection_size = m_valid_connections.size();
+	network_message::message message = { m_user_id,network_message::id_user_id_assignment,""};
+	message.message_body = std::to_string(connection_size);
+	send_message(message, m_valid_connections[connection_size-1].first, m_valid_connections[connection_size-1].second);
 }
 
 void server::reassign_id_of_existing_users() {
@@ -154,7 +158,15 @@ void server::close_server() {
 	reset_player_names();
 }
 
-engine::ref<server> server::create(unsigned short port)
+void server::write_to_sfml_packet(const network_message::message& message, sf::Packet& packet) {
+	packet << message.sender_id << message.message_id << message.message_body;
+}
+
+void server::read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message) {
+	packet >> message.sender_id >> message.message_id >> message.message_body;
+}
+
+engine::ref<server> server::create(unsigned short server_port, int max_players)
 {
-	return std::make_shared<server>(port);
+	return std::make_shared<server>(server_port, max_players);
 }

@@ -21,6 +21,9 @@ private:
 
 	void send_user_name();
 
+	void write_to_sfml_packet(const network_message::message& message, sf::Packet& packet);
+	void read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message);
+
 	int m_user_id;
 	int m_connection_step;
 	unsigned short m_server_port;

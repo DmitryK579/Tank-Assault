@@ -1,13 +1,5 @@
 #include "client.h"
 
-sf::Packet& operator <<(sf::Packet& packet, const network_message::message& message) {
-	return packet << message.sender_id << message.message_id << message.message_body;
-}
-
-sf::Packet& operator >>(sf::Packet& packet, network_message::message& message) {
-	return packet >> message.sender_id >> message.message_id >> message.message_body;
-}
-
 client::client(unsigned short server_port) {
 	m_server_port = server_port;
 	m_server_ip = NULL;
@@ -31,7 +23,7 @@ void client::recieve_messages() {
 			//error
 			break;
 		}
-		recieved_packet >> message;
+		read_message_from_sfml_packet(recieved_packet, message);
 		process_message(message, sender, port);
 	}
 }
@@ -85,7 +77,7 @@ void client::process_message(const network_message::message& message, const sf::
 
 void client::send_message(const network_message::message& message, const sf::IpAddress& ip, const unsigned short& port) {
 	sf::Packet packet;
-	packet << message;
+	write_to_sfml_packet(message, packet);
 	m_socket.send(packet, ip, port);
 }
 
@@ -114,6 +106,14 @@ void client::leave_server() {
 	m_socket.unbind();
 	m_server_ip = NULL;
 	m_player_names.clear();
+}
+
+void client::write_to_sfml_packet(const network_message::message& message, sf::Packet& packet) {
+	packet << message.sender_id << message.message_id << message.message_body;
+}
+
+void client::read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message) {
+	packet >> message.sender_id >> message.message_id >> message.message_body;
 }
 
 engine::ref<client> client::create(unsigned short server_port)

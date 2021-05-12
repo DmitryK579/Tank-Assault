@@ -5,7 +5,7 @@
 
 class server {
 public:
-	server(unsigned short port);
+	server(unsigned short server_port, int max_players);
 	~server();
 
 	void on_update(const engine::timestep& time_step);
@@ -14,19 +14,21 @@ public:
 	void launch_server(std::string player_name);
 	void close_server();
 
-	static engine::ref<server> create(unsigned short port);
+	static engine::ref<server> create(unsigned short server_port, int max_players);
 
 private:
 	void send_message(const network_message::message& message, const sf::IpAddress& ip, const unsigned short& port);
 
 	void process_message(const network_message::message& message, const sf::IpAddress& sender, const unsigned short& port);
 	void respond_to_join_request(const network_message::message& message, const sf::IpAddress& sender, const unsigned short& port);
-	void assign_new_user_id();
+	void assign_id_to_new_user();
 	void reassign_id_of_existing_users();
 	void send_all_player_names();
 	void reset_player_names();
 	void disconnect_player(int id);
-	std::vector<std::string> split_string(const std::string& string);
+
+	void write_to_sfml_packet(const network_message::message& message, sf::Packet& packet);
+	void read_message_from_sfml_packet(sf::Packet& packet, network_message::message& message);
 
 	int m_max_players;
 	int m_user_id;
