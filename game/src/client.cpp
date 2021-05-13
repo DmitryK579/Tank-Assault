@@ -125,6 +125,16 @@ void client::leave_server() {
 	}
 }
 
+int client::get_number_of_players() {
+	int players = 0;
+	for (int i = 0; i < m_player_names.size(); i++) {
+		if (m_player_names[i] != "<Empty>") {
+			players += 1;
+		}
+	}
+	return players;
+}
+
 // Write message to SFML packet
 sf::Packet client::write_to_sfml_packet(const network_message::message& message) {
 	sf::Packet packet;

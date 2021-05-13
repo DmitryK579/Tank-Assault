@@ -1,7 +1,9 @@
 #include "level.h"
 
 level::level(engine::ref<network> network_ref) {
+	m_player_id = 0;
 	m_network_ref = network_ref;
+	m_player_controller = player_controller::create();
 
 	m_terrain = terrain::create("assets/textures/gametiles.png");
 	m_level_1_terrain_sequence = {
@@ -31,20 +33,39 @@ level::~level() {
 }
 
 void level::initialize_tanks() {
-	m_player_tank = player_tank::create(0);
+	if (!m_network_ref->is_active()) {
+		engine::ref<tank> tank = tank::create(0);
+		m_tanks.push_back(tank);
+	}
+	else {
+		int players = m_network_ref->get_number_of_players();
+		m_player_id = m_network_ref->get_user_id();
+		for (int i = 0; i < players; i++) {
+			engine::ref<tank> tank = tank::create(i);
+			m_tanks.push_back(tank);
+		}
+	}
 }
 
 void level::on_update(const engine::timestep& time_step) {
-	m_player_tank->on_update(time_step);
+	m_player_controller->on_update();
+	if (m_player_controller->new_command()) {
+		m_tanks[m_player_id]->change_movement_direction(m_player_controller->get_command());
+	}
+	for (int i = 0; i < m_tanks.size(); i++) {
+		m_tanks[i]->on_update(time_step);
+	}
 }
 
 void level::on_render(engine::ref<engine::shader> shader) {
 	m_terrain->on_render(shader);
-	m_player_tank->on_render(shader);
+	for (int i = 0; i < m_tanks.size(); i++) {
+		m_tanks[i]->on_render(shader);
+	}
 }
 
 void level::on_event(engine::event& event) {
-	m_player_tank->on_event(event);
+
 }
 
 engine::ref<level> level::create(engine::ref<network> network_ref)

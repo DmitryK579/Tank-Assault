@@ -14,7 +14,10 @@ public:
 	void join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name);
 	void leave_server();
 
+	bool is_active() { return m_is_active; }
 	std::vector<std::string> get_player_names() { return m_player_names; }
+	int get_id() { return m_user_id; }
+	int get_number_of_players();
 
 	static engine::ref<client> create(unsigned short server_port);
 

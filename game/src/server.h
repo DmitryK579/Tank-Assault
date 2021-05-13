@@ -14,7 +14,9 @@ public:
 	void launch_server(std::string player_name);
 	void close_server();
 
+	bool is_active() { return m_is_active; }
 	std::vector<std::string> get_player_names() { return m_player_names; }
+	int get_number_of_players() { return m_valid_connections.size() + 1; }
 
 	static engine::ref<server> create(unsigned short server_port, int max_players);
 

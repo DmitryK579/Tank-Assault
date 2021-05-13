@@ -52,7 +52,14 @@ void network::leave_server() {
 }
 // Call every frame
 void network::on_update(const engine::timestep& time_step) {
-	
+	if (m_is_active) {
+		if (m_is_host) {
+			m_is_active = m_server->is_active();
+		}
+		else {
+			m_is_active = m_client->is_active();
+		}
+	}
 }
 
 // Return name in specified index
@@ -67,6 +74,24 @@ std::string network::get_player_name(int index) {
 		else {
 			return m_client->get_player_names()[index];
 		}
+	}
+}
+
+int network::get_user_id() {
+	if (m_is_host || !m_is_active) {
+		return 0;
+	}
+	else {
+		m_client->get_id();
+	}
+}
+
+int network::get_number_of_players() {
+	if (m_is_host) {
+		return m_server->get_number_of_players();
+	}
+	else {
+		return m_client->get_number_of_players();
 	}
 }
 

@@ -19,12 +19,13 @@ public:
 
 	static engine::ref<network> create();
 
-	bool get_is_active() { return m_is_active; }
-
+	bool is_active() { return m_is_active; }
+	bool is_hosting() { return m_is_host; }
 	std::string get_public_ip() { return m_public_ip_address; }
 	std::string get_local_ip() { return m_local_ip_address; }
-
 	std::string get_player_name(int index);
+	int get_user_id();
+	int get_number_of_players();
 
 private:
 

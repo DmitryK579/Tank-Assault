@@ -1,8 +1,9 @@
 #pragma once
 #include <engine.h>
 #include "terrain.h"
-#include "player_tank.h"
+#include "tank.h"
 #include "network.h"
+#include "player_controller.h"
 
 class level {
 public:
@@ -18,10 +19,14 @@ public:
 	static engine::ref<level> create(engine::ref<network> network_ref);
 
 private:
+
+	int m_player_id;
+
 	engine::ref<terrain> m_terrain;
 	std::vector<std::pair<int,int>> m_level_1_terrain_sequence;
 
-	engine::ref<player_tank> m_player_tank{};
+	std::vector<engine::ref<tank>> m_tanks{};
 
 	engine::ref<network> m_network_ref{};
+	engine::ref<player_controller> m_player_controller{};
 };
