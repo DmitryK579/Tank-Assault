@@ -14,6 +14,7 @@ public:
 	void create_server(std::string player_name);
 	void join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name);
 	void leave_server();
+	void server_start_game();
 
 	void on_update(const engine::timestep& time_step);
 
@@ -21,6 +22,7 @@ public:
 
 	bool is_active() { return m_is_active; }
 	bool is_hosting() { return m_is_host; }
+	bool all_players_ready();
 	std::string get_public_ip() { return m_public_ip_address; }
 	std::string get_local_ip() { return m_local_ip_address; }
 	std::string get_player_name(int index);

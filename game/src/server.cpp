@@ -6,6 +6,7 @@ server::server(unsigned short server_port, int max_players) {
 	m_accepting_clients = false;
 	m_is_active = false;
 	m_is_in_game = false;
+	m_all_players_ready = false;
 	m_user_id = 0;
 	m_max_players = 4;
 	m_empty_name = "<Empty>";
@@ -47,7 +48,7 @@ void server::process_message(const network_message::message& message, const sf::
 		case network_message::id_player_name:
 			m_player_names[message.sender_id] = message.message_body;
 			send_all_player_names();
-			m_client_connection_steps[message.sender_id-1] = step_ready;
+			m_client_connection_steps[message.sender_id-1] = step_in_lobby;
 			break;
 
 		// Recieved ping
@@ -59,6 +60,10 @@ void server::process_message(const network_message::message& message, const sf::
 			disconnect_player(message.sender_id);
 			break;
 
+		case network_message::id_start_sync:
+			m_client_connection_steps[message.sender_id - 1] = step_start_sync_confirmed;
+			start_sync_response();
+			break;
 		}
 	}
 }
@@ -159,6 +164,24 @@ void server::reset_player_names() {
 	}
 }
 
+// Check if all clients are ready to begin the game
+void server::start_sync_response() {
+	bool wait = false;
+	for (int i = 0; i < m_client_connection_steps.size(); i++) {
+		if (m_client_connection_steps[i] != step_start_sync_confirmed) {
+			wait = true;
+		}
+	}
+	if (!wait) {
+		network_message::message message = { m_user_id, network_message::id_start_sync_confirmed,"" };
+		for (int i = 0; i < m_valid_connections.size(); i++) {
+			send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
+			m_client_connection_steps[i] = step_in_game;
+		}
+		m_all_players_ready = true;
+	}
+}
+
 // Create new server and begin listening for messages.
 void server::launch_server(std::string player_name) {
 	m_is_active = true;
@@ -181,6 +204,21 @@ void server::close_server() {
 	m_valid_connections.clear();
 	m_client_connection_steps.clear();
 	reset_player_names();
+}
+
+void server::start_game() {
+	m_accepting_clients = false;
+	m_is_in_game = true;
+	if (m_valid_connections.size() == 0) {
+		m_all_players_ready = true;
+	}
+	else {
+		network_message::message message = { m_user_id, network_message::id_start_game,"" };
+		for (int i = 0; i < m_valid_connections.size(); i++) {
+			send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
+			m_client_connection_steps[i] = step_start_sync_request;
+		}
+	}
 }
 
 // Write message to SFML packet

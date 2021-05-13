@@ -15,6 +15,7 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 	m_text_colour_entering = glm::vec3(0.5f, 0.f, 1.0f);
 	m_in_menu = true;
 	m_entering_text = false;
+	m_lock_controls = false;
 	m_is_hostring_server = false;
 	m_is_joining_server = false;
 	m_menu_state = state_title_screen;
@@ -151,6 +152,11 @@ bool main_menu::on_update(const engine::timestep& time_step) {
 		if (m_network_ref->is_active() == false) {
 			switch_menu(state_multiplayer_menu);
 		}
+
+		// Begin game if all players are ready
+		if (m_network_ref->all_players_ready()) {
+			m_in_menu = false;
+		}
 	}
 	return m_in_menu;
 }
@@ -161,25 +167,27 @@ void main_menu::on_event(engine::event& event) {
 	{
 		auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 		if (!m_entering_text) {
-			// Change selected option in menu
-			if (e.key_code() == engine::key_codes::KEY_UP) {
-				m_current_menu_choice -= 1;
-			}
-			if (e.key_code() == engine::key_codes::KEY_DOWN) {
-				m_current_menu_choice += 1;
-			}
+			if (!m_lock_controls) {
+				// Change selected option in menu
+				if (e.key_code() == engine::key_codes::KEY_UP) {
+					m_current_menu_choice -= 1;
+				}
+				if (e.key_code() == engine::key_codes::KEY_DOWN) {
+					m_current_menu_choice += 1;
+				}
 
-			// Wrap selection if it is out of bounds
-			if (m_current_menu_choice < 0) {
-				m_current_menu_choice = m_menu_choices[m_menu_state] - 1;
-			}
-			else if (m_current_menu_choice > m_menu_choices[m_menu_state] - 1) {
-				m_current_menu_choice = 0;
-			}
+				// Wrap selection if it is out of bounds
+				if (m_current_menu_choice < 0) {
+					m_current_menu_choice = m_menu_choices[m_menu_state] - 1;
+				}
+				else if (m_current_menu_choice > m_menu_choices[m_menu_state] - 1) {
+					m_current_menu_choice = 0;
+				}
 
-			// Move to a different menu or allow user to enter text
-			if (e.key_code() == engine::key_codes::KEY_ENTER) {
-				confirm_selection();
+				// Move to a different menu or allow user to enter text
+				if (e.key_code() == engine::key_codes::KEY_ENTER) {
+					confirm_selection();
+				}
 			}
 		}
 		else {
@@ -344,7 +352,8 @@ void main_menu::confirm_selection() {
 	else if (m_menu_state == state_multiplayer_lobby_host) {
 		// Begin multiplayer game
 		if (m_current_menu_choice == 0) {
-
+			m_network_ref->server_start_game();
+			m_lock_controls = true;
 		}
 		// Back to multiplayer menu
 		if (m_current_menu_choice == 1) {

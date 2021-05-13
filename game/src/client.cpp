@@ -8,6 +8,7 @@ client::client(unsigned short server_port) {
 	m_user_id = 255;
 	m_player_name = "!";
 	m_is_active = false;
+	m_all_players_ready = false;
 }
 
 client::~client() {
@@ -52,7 +53,7 @@ void client::process_message(const network_message::message& message, const sf::
 		case network_message::id_user_id_assignment:
 		{
 			m_user_id = stoi(message.message_body);
-			if (m_connection_step != step_ready) {
+			if (m_connection_step == step_request_id) {
 				send_user_name();
 				m_connection_step = step_request_all_names;
 			}
@@ -64,7 +65,7 @@ void client::process_message(const network_message::message& message, const sf::
 		{
 			std::vector<std::string> all_names = network_message::split_message(message.message_body);
 			m_player_names = all_names;
-			m_connection_step = step_ready;
+			m_connection_step = step_in_lobby;
 			break;
 		}
 
@@ -83,6 +84,18 @@ void client::process_message(const network_message::message& message, const sf::
 		case network_message::id_kick:
 			leave_server();
 			break;
+
+		// Server started the game
+		case network_message::id_start_game:
+			m_connection_step = step_start_sync_check;
+			game_start_response();
+			break;
+
+		// Server confirmed every client can start the game
+		case network_message::id_start_sync_confirmed:
+			m_connection_step = step_in_game;
+			m_all_players_ready = true;
+			break;
 		}
 	}
 }
@@ -96,6 +109,11 @@ void client::send_message(const network_message::message& message, const sf::IpA
 // Send the player's name to server
 void client::send_user_name() {
 	network_message::message response = { m_user_id,network_message::id_player_name,m_player_name };
+	send_message(response, m_server_ip, m_server_port);
+}
+
+void client::game_start_response() {
+	network_message::message response = { m_user_id,network_message::id_start_sync,"" };
 	send_message(response, m_server_ip, m_server_port);
 }
 

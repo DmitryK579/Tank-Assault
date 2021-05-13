@@ -16,4 +16,5 @@ public:
 private:
 	char m_command;
 	char m_old_command;
+	bool m_controls_locked;
 };

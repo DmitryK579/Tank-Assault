@@ -73,12 +73,12 @@ void tank::on_update(const engine::timestep& time_step) {
 // Call to render the tank.
 void tank::on_render(engine::ref<engine::shader> shader) {
 	glm::mat4 chassis_transform(1.0f);
-	chassis_transform = glm::translate(chassis_transform, glm::vec3(m_position.x, m_position.y, .0f));
+	chassis_transform = glm::translate(chassis_transform, glm::vec3(m_position.x, m_position.y, (0.0f+(float)m_id)));
 	chassis_transform = glm::rotate(chassis_transform, m_angle, glm::vec3(0, 0, 1));
 	m_chassis_sprite->on_render(chassis_transform, shader);
 
 	glm::mat4 turret_transform(1.0f);
-	glm::vec3 turret_offset = glm::vec3(10.0f * m_velocity.x, 10.0f * m_velocity.y, 0.2f);
+	glm::vec3 turret_offset = glm::vec3(10.0f * m_velocity.x, 10.0f * m_velocity.y, (0.2f+(float)m_id));
 	turret_transform = glm::translate(turret_transform, glm::vec3(m_position.x + turret_offset.x, m_position.y + turret_offset.y, turret_offset.z));
 	turret_transform = glm::rotate(turret_transform, m_angle, glm::vec3(0, 0, 1));
 	m_turret_sprite->on_render(turret_transform, shader);

@@ -15,12 +15,15 @@ public:
 	void on_event(engine::event& event);
 
 	void initialize_tanks();
+	void synchronization_check();
 
 	static engine::ref<level> create(engine::ref<network> network_ref);
 
 private:
 
 	int m_player_id;
+	int m_new_object_id;
+	bool m_is_active;
 
 	engine::ref<terrain> m_terrain;
 	std::vector<std::pair<int,int>> m_level_1_terrain_sequence;

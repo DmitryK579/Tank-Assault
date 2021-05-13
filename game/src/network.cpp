@@ -50,6 +50,12 @@ void network::leave_server() {
 		m_is_active = false;
 	}
 }
+// Start game as host
+void network::server_start_game() {
+	if (m_is_host) {
+		m_server->start_game();
+	}
+}
 // Call every frame
 void network::on_update(const engine::timestep& time_step) {
 	if (m_is_active) {
@@ -82,7 +88,7 @@ int network::get_user_id() {
 		return 0;
 	}
 	else {
-		m_client->get_id();
+		return m_client->get_id();
 	}
 }
 
@@ -92,6 +98,15 @@ int network::get_number_of_players() {
 	}
 	else {
 		return m_client->get_number_of_players();
+	}
+}
+
+bool network::all_players_ready() {
+	if (m_is_host) {
+		return m_server->all_players_ready();
+	}
+	else {
+		return m_client->all_players_ready();
 	}
 }
 

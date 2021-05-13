@@ -13,8 +13,10 @@ public:
 	void recieve_messages();
 	void launch_server(std::string player_name);
 	void close_server();
+	void start_game();
 
 	bool is_active() { return m_is_active; }
+	bool all_players_ready() { return m_all_players_ready; }
 	std::vector<std::string> get_player_names() { return m_player_names; }
 	int get_number_of_players() { return m_valid_connections.size() + 1; }
 
@@ -30,6 +32,7 @@ private:
 	void send_all_player_names();
 	void reset_player_names();
 	void disconnect_player(int id);
+	void start_sync_response();
 
 	sf::Packet write_to_sfml_packet(const network_message::message& message);
 	network_message::message read_message_from_sfml_packet(sf::Packet& packet);
@@ -49,6 +52,7 @@ private:
 	bool m_accepting_clients;
 	bool m_is_active;
 	bool m_is_in_game;
+	bool m_all_players_ready;
 
 	sf::UdpSocket m_socket;
 
@@ -56,7 +60,9 @@ private:
 	std::thread* m_communication_thread;
 
 	static const int step_request_name = 1;
-	static const int step_ready = 2;
-	static const int step_in_game = 3;
+	static const int step_in_lobby = 2;
+	static const int step_start_sync_request = 3;
+	static const int step_start_sync_confirmed = 4;
+	static const int step_in_game = 5;
 
 };

@@ -29,6 +29,7 @@ private:
 
 	bool											m_in_menu;
 	bool											m_entering_text;
+	bool											m_lock_controls;
 	bool											m_is_hostring_server;
 	bool											m_is_joining_server;
 

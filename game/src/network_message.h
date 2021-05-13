@@ -14,14 +14,18 @@ public:
 
 	static constexpr char separation_symbol = ';';
 
-	static constexpr int id_request_join = 1;
-	static constexpr int id_request_join_response = 2;
-	static constexpr int id_user_id_assignment = 3;
-	static constexpr int id_player_name = 4;
-	static constexpr int id_all_player_names = 5;
-	static constexpr int id_ping = 6;
-	static constexpr int id_leave = 7;
-	static constexpr int id_kick = 8;
+	static constexpr int id_request_join = 1; // Client message
+	static constexpr int id_request_join_response = 2; // Server message
+	static constexpr int id_user_id_assignment = 3; // Server message
+	static constexpr int id_player_name = 4; // Client message
+	static constexpr int id_all_player_names = 5; // Server message
+	static constexpr int id_ping = 6; // Common message
+	static constexpr int id_leave = 7; // Common message
+	static constexpr int id_kick = 8; // Server message
+	static constexpr int id_start_game = 9; // Server message
+	static constexpr int id_start_sync = 10; // Client message
+	static constexpr int id_start_sync_confirmed = 11; // Server message
+	static constexpr int id_tank_state = 12; // Common message
 
 
 };
