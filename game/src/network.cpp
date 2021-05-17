@@ -103,6 +103,8 @@ int network::get_number_of_players() {
 	}
 }
 
+// Takes tank states from the vector acting as a first in first out queue, and erase the states
+// that were obtained from the queue.
 std::vector<network_message::object_states> network::get_received_tank_states() {
 	std::vector<network_message::object_states> received_tank_states;
 	if (m_is_host) {
@@ -116,6 +118,7 @@ std::vector<network_message::object_states> network::get_received_tank_states() 
 	return received_tank_states;
 }
 
+// Send tank object state to network
 void network::send_tank_state(network_message::object_states& tank_state) {
 	if (m_is_host) {
 		m_server->send_tank_state(tank_state);
@@ -134,6 +137,7 @@ bool network::all_players_ready() {
 	}
 }
 
+// Checks if any player has disconnected from the game.
 bool network::player_in_game_disconnected() {
 	if (m_is_host) {
 		return m_server->player_in_game_disconnected();
@@ -141,6 +145,7 @@ bool network::player_in_game_disconnected() {
 	return false;
 }
 
+// Confirms to server that all objects states in level were sent.
 void network::object_states_sent() {
 	if (m_is_host) {
 		m_server->object_states_sent();

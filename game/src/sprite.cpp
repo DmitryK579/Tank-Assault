@@ -4,6 +4,7 @@
 
 sprite::sprite(const std::string& path, float width, float height)
 {
+	// Initialise class variables
 	m_main_image = engine::texture_2d::create(path, true);
 	m_transparency = 1.0f;
 	m_scale = glm::vec2(1.f, 1.f);
@@ -72,6 +73,7 @@ void sprite::add_frame_quad(int sprite_size_x, int sprite_size_y, int horizontal
 	m_total_frames += 1;
 }
 
+// Change the current frame, as long as it exists.
 void sprite::set_current_frame(int frame) {
 	if (frame <= m_total_frames && frame > 0) {
 		m_current_frame = frame;

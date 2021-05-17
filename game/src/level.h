@@ -26,16 +26,16 @@ private:
 
 	void quit_to_menu();
 
-	int m_player_id;
-	int m_new_object_id;
-	bool m_is_active;
-	bool m_in_menu;
+	int									m_player_id;
+	int									m_new_object_id;
+	bool								m_is_active;
+	bool								m_in_menu;
 
-	engine::ref<terrain> m_terrain;
-	std::vector<std::pair<int,int>> m_level_1_terrain_sequence;
+	engine::ref<terrain>				m_terrain;
+	std::vector<std::pair<int,int>>		m_level_1_terrain_sequence;
 
-	std::vector<engine::ref<tank>> m_tanks{};
+	std::vector<engine::ref<tank>>		m_tanks{};
+	engine::ref<player_controller>		m_player_controller{};
 
-	engine::ref<network> m_network_ref{};
-	engine::ref<player_controller> m_player_controller{};
+	engine::ref<network>				m_network_ref{};
 };

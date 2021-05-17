@@ -2,6 +2,7 @@
 
 class tank_commands {
 public:
+	// Expressions that can be used to influence the behaviour of a tank
 	static constexpr char move_up = 'U';
 	static constexpr char move_down = 'D';
 	static constexpr char move_right = 'R';

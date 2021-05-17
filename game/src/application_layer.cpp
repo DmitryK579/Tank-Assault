@@ -53,9 +53,11 @@ application_layer::application_layer()
 
 application_layer::~application_layer() {}
 
+// Function called every frame
 void application_layer::on_update(const engine::timestep& time_step) 
 {
 	m_network->on_update(time_step);
+
 	if (m_in_menu) {
 		m_main_menu->on_update(time_step);
 		m_in_menu = m_main_menu->get_in_menu();
@@ -66,6 +68,7 @@ void application_layer::on_update(const engine::timestep& time_step)
 			
 		}
 	}
+
 	else if (m_in_level){
 		m_level->on_update(time_step);
 		if (m_level->get_in_menu() == true) {
@@ -81,23 +84,20 @@ void application_layer::on_render()
     engine::render_command::clear_color({0.2f, 0.3f, 0.3f, 1.0f}); 
     engine::render_command::clear();
 
-	//2d scene using the material shader
+	//2d scene using the material shader and text shader
 	const auto textured_lighting_shader = engine::renderer::shaders_library()->get("mesh_lighting");
+	const auto text_shader = engine::renderer::shaders_library()->get("text_2D");
+
 	engine::renderer::begin_scene(m_2d_camera, textured_lighting_shader);
 
-	const auto text_shader = engine::renderer::shaders_library()->get("text_2D");
 	if (m_in_menu) {
-		// Render menu
 		m_main_menu->on_render(textured_lighting_shader, text_shader);
 
 	}
 	else if (m_in_level){
-		// Render level
 		m_level->on_render(textured_lighting_shader);
 	}
 	engine::renderer::end_scene();
-	// Render text
-	// m_text_manager->render_text(text_shader, "Orange Text", 10.f, (float)engine::application::window().height()-25.f, 0.5f, glm::vec4(1.f, 0.5f, 0.f, 1.f));
 } 
 
 void application_layer::on_event(engine::event& event) 

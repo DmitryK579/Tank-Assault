@@ -36,17 +36,17 @@ public:
 
 private:
 
-	int m_max_players;
-	unsigned short m_server_port;
-	unsigned short m_user_port;
-	std::string m_player_name;
+	int						m_max_players;
+	unsigned short			m_server_port;
+	unsigned short			m_user_port;
+	std::string				m_player_name;
 
-	std::string m_public_ip_address;
-	std::string m_local_ip_address;
+	std::string				m_public_ip_address;
+	std::string				m_local_ip_address;
 	
-	bool m_is_host;
-	bool m_is_active;
+	bool					m_is_host;
+	bool					m_is_active;
 
-	engine::ref<server> m_server{};
-	engine::ref<client> m_client{};
+	engine::ref<server>		m_server{};
+	engine::ref<client>		m_client{};
 };

@@ -18,16 +18,16 @@ client::~client() {
 
 }
 // Recieve packets sent to client
-void client::recieve_messages() {
+void client::receive_messages() {
 	while (m_is_active) {
 		sf::IpAddress sender;
 		unsigned short port;
-		sf::Packet recieved_packet;
-		if (m_socket.receive(recieved_packet, sender, port) != sf::Socket::Done) {
+		sf::Packet received_packet;
+		if (m_socket.receive(received_packet, sender, port) != sf::Socket::Done) {
 			//error
 		}
 		else {
-			network_message::message message = read_message_from_sfml_packet(recieved_packet);
+			network_message::message message = read_message_from_sfml_packet(received_packet);
 			process_message(message, sender, port);
 		}
 		
@@ -45,8 +45,9 @@ void client::process_message(const network_message::message& message, const sf::
 		case network_message::id_request_join_response:
 			// Join request accepted
 			if (message.message_body == "y") {
-				m_server_ip = sender;
-				switch_connection_step(step_request_id);
+				if (m_connection_step == step_request_connect) {
+					switch_connection_step(step_request_id);
+				}
 			}
 			// Join request denied
 			else {
@@ -58,13 +59,11 @@ void client::process_message(const network_message::message& message, const sf::
 		case network_message::id_user_id_assignment:
 		{
 			m_user_id = stoi(message.message_body);
+
+			// Server sends two messages as reply in case of a successful connection
+			// so this statement is a safeguard if messages arrive out of order
+			// since the second message will arrive only if connection has been accepted
 			if (m_connection_step == step_request_id || m_connection_step == step_request_connect) {
-				// Server sends two messages as reply in case of a successful connection
-				// so this statement is a safeguard if messages arrive out of order
-				// since the second message will arrive only if connection has been accepted
-				if (m_server_ip != sender) {
-					m_server_ip = sender;
-				}
 				send_user_name();
 				switch_connection_step(step_request_all_names);
 			}
@@ -74,7 +73,7 @@ void client::process_message(const network_message::message& message, const sf::
 			send_user_name();
 			break;
 
-		// Recieved name of every player from server
+		// Received name of every player from server
 		case network_message::id_all_player_names:
 		{
 			std::vector<std::string> all_names = network_message::split_message(message.message_body);
@@ -83,13 +82,14 @@ void client::process_message(const network_message::message& message, const sf::
 			break;
 		}
 
-		// Recieved ping
+		// Received ping request
 		case network_message::id_ping:
 			m_timeout_timer = 0;
 			m_current_reconnection_attempt = 0;
 			respond_to_ping(sender, port);
 			break;
 
+		// Ping request returned
 		case network_message::id_ping_return:
 			m_timeout_timer = 0;
 			m_current_reconnection_attempt = 0;
@@ -113,12 +113,13 @@ void client::process_message(const network_message::message& message, const sf::
 			game_start_response();
 			break;
 
-		// Server confirmed every client can start the game
+		// Server confirmed every client has started the game
 		case network_message::id_start_sync_confirmed:
 			switch_connection_step(step_in_game);
 			m_all_players_ready = true;
 			break;
 
+		// Received tank object state
 		case network_message::id_tank_state:
 			store_tank_state(message);
 			break;
@@ -126,9 +127,12 @@ void client::process_message(const network_message::message& message, const sf::
 	}
 }
 
+// Call every frame
 void client::on_update(const engine::timestep& time_step) {
+
 	if (m_is_active) {
 		m_timeout_timer += (float)time_step;
+		// If no messages received for too long, contact server. If server cannot be reached, disconnect.
 		if (m_timeout_timer > 2) {
 			if (m_current_reconnection_attempt >= m_max_reconnection_attempts) {
 				leave_server();
@@ -138,6 +142,7 @@ void client::on_update(const engine::timestep& time_step) {
 	}
 }
 
+// Send a message to the server based on the client's current connection step
 void client::retry_send() {
 	m_timeout_timer = 0;
 	m_current_reconnection_attempt += 1;
@@ -175,6 +180,7 @@ void client::send_message(const network_message::message& message, const sf::IpA
 	m_socket.send(packet, ip, port);
 }
 
+// Change client's connection step and reset connection timeout counters.
 void client::switch_connection_step(int step) {
 	m_connection_step = step;
 	m_timeout_timer = 0;
@@ -187,11 +193,13 @@ void client::send_user_name() {
 	send_message(response, m_server_ip, m_server_port);
 }
 
+// Confirm to the server that this client can begin the game.
 void client::game_start_response() {
 	network_message::message response = { m_user_id,network_message::id_start_sync,"" };
 	send_message(response, m_server_ip, m_server_port);
 }
 
+// Send tank object state to the server.
 void client::send_tank_state(network_message::object_states& tank_state) {
 	network_message::message message = { m_user_id,network_message::id_tank_state,"" };
 	std::string body = "";
@@ -220,11 +228,13 @@ void client::send_tank_state(network_message::object_states& tank_state) {
 	
 }
 
+// Respond to a ping request from the server.
 void client::respond_to_ping(const sf::IpAddress& ip, const unsigned short& port) {
 	network_message::message message = { m_user_id,network_message::id_ping_return,"" };
 	send_message(message, ip, port);
 }
 
+// Store received tank state in a vector acting as a first in first out queue.
 void client::store_tank_state(const network_message::message& message) {
 	m_timeout_timer = 0;
 	m_current_reconnection_attempt = 0;
@@ -241,6 +251,7 @@ void client::store_tank_state(const network_message::message& message) {
 	m_received_tank_states.push_back(tank);
 }
 
+// Erase entries from the start of the tank state vector.
 void client::erase_received_tank_states(int entries_to_delete) {
 	for (int i = 0; i < entries_to_delete; i++) {
 		m_received_tank_states.erase(m_received_tank_states.begin());
@@ -255,12 +266,12 @@ void client::join_server(sf::IpAddress ip_address, unsigned short port, std::str
 	m_is_active = true;
 	m_server_ip = ip_address;
 	switch_connection_step(step_request_connect);
-	m_communication_thread = new std::thread(&client::recieve_messages, this);
+	m_communication_thread = new std::thread(&client::receive_messages, this);
 	network_message::message message = { m_user_id,network_message::id_request_join,"" };
 	send_message(message, ip_address, m_server_port);
 }
 
-// Leave the server.
+// Leave the server and reset most class variables.
 void client::leave_server() {
 	if (m_is_active) {
 		network_message::message message = { m_user_id, network_message::id_leave, "" };
@@ -276,6 +287,7 @@ void client::leave_server() {
 	}
 }
 
+// Calculates number of players in session by names of players.
 int client::get_number_of_players() {
 	int players = 0;
 	for (int i = 0; i < m_player_names.size(); i++) {

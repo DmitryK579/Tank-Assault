@@ -1,6 +1,7 @@
 #include "terrain.h"
 
 terrain::terrain(const std::string& path) {
+	// Initialise class variables
 	m_terrain_spritesheet = engine::texture_2d::create(path, true);
 	m_tile_size_x = 40;
 	m_tile_size_y = 40;
@@ -31,6 +32,9 @@ void terrain::build_layout(int horizontal_tile_number, int vertical_tile_number,
 		m_terrain_quads.push_back(quad);
 	}
 
+	// Form level boundaries from the amount of tiles used.
+	// Will need refactoring if number of tiles changes between levels.
+
 	float terrain_x_size = m_tile_size_x * (horizontal_tile_number-1);
 	float terrain_y_size = m_tile_size_y * (vertical_tile_number-1);
 
@@ -54,9 +58,11 @@ std::vector<float> terrain::get_terrain_boundaries() {
 void terrain::on_render(engine::ref<engine::shader> shader) {
 	m_terrain_spritesheet->bind();
 	int quad_index = 0;
+
 	for (int i = 0; i < m_vertical_tile_number; i++) {
 		for (int j = 0; j < m_horizontal_tile_number; j++) {
 			glm::mat4 transform(1.0f);
+			// Push terrain tiles into the upper left corner of the screen.
 			transform = glm::translate(transform, glm::vec3(
 				m_tile_size_x * j * 2 - ((float)engine::application::window().width() - 80.0f),
 				-m_tile_size_y * i * 2 + ((float)engine::application::window().height() - 80.0f),

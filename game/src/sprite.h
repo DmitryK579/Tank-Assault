@@ -34,15 +34,15 @@ public:
 
 private:
 
-	glm::vec2						m_scale;
-	float							m_timer;
-	float							m_frame_time;
-	int								m_total_frames;
-	int								m_current_frame;
-	bool							m_is_animating;
+	float								m_transparency;
+	float								m_timer;
+	float								m_frame_time;
+	int									m_total_frames;
+	int									m_current_frame;
+	bool								m_is_animating;
+	glm::vec2							m_scale;
 
-	engine::ref<engine::texture_2d> m_main_image;
-	float							m_transparency;
-	engine::ref<quad>				m_main_image_quad;
-	std::vector<engine::ref<quad>>	m_frame_quads;
+	engine::ref<engine::texture_2d>		m_main_image;
+	engine::ref<quad>					m_main_image_quad;
+	std::vector<engine::ref<quad>>		m_frame_quads;
 };

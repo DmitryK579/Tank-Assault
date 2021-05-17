@@ -45,6 +45,7 @@ void server::process_message(const network_message::message& message, const sf::
 		respond_to_join_request(message, sender, port);
 	}
 	else {
+		// Check if a client that was removed from valid connections is attempting to contact the server.
 		bool invalid_connection = true;
 		for (int i = 0; i < m_valid_connections.size(); i++) {
 			if (sender == m_valid_connections[i].first) {
@@ -55,20 +56,21 @@ void server::process_message(const network_message::message& message, const sf::
 		if (!invalid_connection) {
 			switch (message.message_id) {
 
-				// Recieved client's name
+				// Received client's name
 			case network_message::id_player_name:
 				m_player_names[message.sender_id] = message.message_body;
 				send_all_player_names();
 				switch_client_connection_step((message.sender_id - 1), step_in_lobby);
 				break;
 
-				// Recieved ping
+				// Received ping request
 			case network_message::id_ping:
 				m_client_timeout_info[message.sender_id - 1].first = 0;
 				m_client_timeout_info[message.sender_id - 1].second = 0;
 				respond_to_ping(sender, port);
 				break;
 
+				// Ping request returned
 			case network_message::id_ping_return:
 				m_client_timeout_info[message.sender_id - 1].first = 0;
 				m_client_timeout_info[message.sender_id - 1].second = 0;
@@ -79,11 +81,13 @@ void server::process_message(const network_message::message& message, const sf::
 				disconnect_player(message.sender_id);
 				break;
 
+				// Received confirmation from client that they can start the game.
 			case network_message::id_start_sync:
 				switch_client_connection_step((message.sender_id - 1), step_start_sync_confirmed);
 				start_sync_response();
 				break;
 
+				// Received tank object state.
 			case network_message::id_tank_state:
 				store_tank_state(message);
 				break;
@@ -95,8 +99,12 @@ void server::process_message(const network_message::message& message, const sf::
 	}
 }
 
+// Call every frame
 void server::on_update(const engine::timestep& time_step) {
+
 	if (m_is_active) {
+		// If no message is received from a client for too long, contact them. If they cannot be
+		// reached, disconnect them from this session.
 		for (int i = 0; i < m_valid_connections.size(); i++) {
 			m_client_timeout_info[i].first += (float)time_step;
 			if (m_client_timeout_info[i].first > 2) {
@@ -116,6 +124,7 @@ void server::send_message(const network_message::message& message, const sf::IpA
 	m_socket.send(packet, ip, port);
 }
 
+// Send a message to a client based on that client's connection step.
 void server::retry_send(int id) {
 	m_client_timeout_info[id].first = 0;
 	m_client_timeout_info[id].second += 1;
@@ -143,6 +152,7 @@ void server::retry_send(int id) {
 	send_message(message, m_valid_connections[id].first, m_valid_connections[id].second);
 }
 
+// Change a client's connection step and reset their timeout variables.
 void server::switch_client_connection_step(int id, int step) {
 	m_client_connection_steps[id] = step;
 	m_client_timeout_info[id].first = 0;
@@ -151,32 +161,45 @@ void server::switch_client_connection_step(int id, int step) {
 
 // Send response to a client's request to join the server
 void server::respond_to_join_request(const network_message::message& message, const sf::IpAddress& sender, const unsigned short& port) {
-	if (message.message_id == network_message::id_request_join) {
-		bool send_new_id = false;
-		std::string body = "";
-		if (m_accepting_clients) {
-			// Accept join request
-			m_valid_connections.push_back({ sender,port });
-			m_client_connection_steps.push_back(step_request_name);
-			m_client_timeout_info.push_back({ 0.0f, 0 });
-			body = "y";
-			send_new_id = true;
 
-			// Maximum players reached; deny any further requests
-			if (m_valid_connections.size() == m_max_players-1) {
-				m_accepting_clients = false;
+	bool existing_connection = false;
+	// Check if a client was added as a valid connection, but the client did not receive a new ID.
+	for (int i = 0; i < m_valid_connections.size(); i++) {
+		if (m_valid_connections[i].first == sender) {
+			existing_connection = true;
+		}
+	}
+	if (!existing_connection) {
+		if (message.message_id == network_message::id_request_join) {
+			bool send_new_id = false;
+			std::string body = "";
+			if (m_accepting_clients) {
+				// Accept join request
+				m_valid_connections.push_back({ sender,port });
+				m_client_connection_steps.push_back(step_request_name);
+				m_client_timeout_info.push_back({ 0.0f, 0 });
+				body = "y";
+				send_new_id = true;
+
+				// Maximum players reached; deny any further requests
+				if (m_valid_connections.size() == m_max_players - 1) {
+					m_accepting_clients = false;
+				}
+			}
+			else {
+				// Deny join request
+				body = "n";
+			}
+			network_message::message response = { m_user_id, network_message::id_request_join_response, body };
+			send_message(response, sender, port);
+			// Assign new id to valid client
+			if (send_new_id) {
+				assign_id_to_new_user();
 			}
 		}
-		else {
-			// Deny join request
-			body = "n";
-		}
-		network_message::message response = { m_user_id, network_message::id_request_join_response, body };
-		send_message(response, sender, port);
-		// Assign new id to valid client
-		if (send_new_id) {
-			assign_id_to_new_user();
-		}
+	}
+	else {
+		reassign_id_of_existing_users();
 	}
 }
 
@@ -212,11 +235,18 @@ void server::disconnect_player(int id) {
 			send_all_player_names();
 			reassign_id_of_existing_users();
 		}
+		else {
+			// Begin solo game if clients cannot be reached.
+			if (m_is_in_game) {
+				m_all_players_ready = true;
+			}
+		}
 		// Accept new clients
 		if (!m_is_in_game) {
 			m_accepting_clients = true;
 		}
 	}
+	// Connection structure should not change during a game.
 	else {
 		m_player_names[id] = m_empty_name;
 		send_all_player_names();
@@ -257,6 +287,7 @@ void server::start_sync_response() {
 		}
 	}
 	if (!wait) {
+		// Send a message that all clients have confirmed they are ready to begin the game.
 		network_message::message message = { m_user_id, network_message::id_start_sync_confirmed,"" };
 		for (int i = 0; i < m_valid_connections.size(); i++) {
 			send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
@@ -266,6 +297,7 @@ void server::start_sync_response() {
 	}
 }
 
+// Send tank object state to all clients.
 void server::send_tank_state(network_message::object_states& tank_state) {
 	network_message::message message = { m_user_id,network_message::id_tank_state,"" };
 	std::string body = "";
@@ -298,12 +330,14 @@ void server::send_tank_state(network_message::object_states& tank_state) {
 	message.message_body = body;
 
 	for (int i = 0; i < m_valid_connections.size(); i++) {
+		// Clients should not receive an update to their own position.
 		if (tank_state.object_id - 1 != i) {
 			send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
 		}
 	}
 }
 
+// Store received tank state in a vector acting as a first in first out queue.
 void server::store_tank_state(const network_message::message& message) {
 	m_client_timeout_info[message.sender_id - 1].first = 0;
 	m_client_timeout_info[message.sender_id - 1].second = 0;
@@ -320,21 +354,25 @@ void server::store_tank_state(const network_message::message& message) {
 	m_received_tank_states.push_back(tank);
 }
 
+// Erase entries from the start of the tank state vector
 void server::erase_received_tank_states(int entries_to_delete) {
 	for (int i = 0; i < entries_to_delete; i++) {
 		m_received_tank_states.erase(m_received_tank_states.begin());
 	}
 }
 
+// Confirmation from level class that all object states have been sent.
 void server::object_states_sent() {
 	m_player_in_game_disconnected = false;
 }
 
+// Remove a client from this session
 void server::kick(const sf::IpAddress& ip, const unsigned short& port) {
 	network_message::message message = { m_user_id, network_message::id_kick,"" };
 	send_message(message, ip, port);
 }
 
+// Respond to a ping request from a client
 void server::respond_to_ping(const sf::IpAddress& ip, const unsigned short& port) {
 	network_message::message message = { m_user_id,network_message::id_ping_return,"" };
 	send_message(message, ip, port);
@@ -350,7 +388,7 @@ void server::launch_server(std::string player_name) {
 	m_communication_thread = new std::thread(&server::receive_messages, this);
 }
 
-// Disconnect all clients and close the server.
+// Disconnect all clients, close the server, and reset class variables.
 void server::close_server() {
 	network_message::message message = { m_user_id, network_message::id_leave, "" };
 	for (int i = 0; i < m_valid_connections.size(); i++) {
@@ -367,6 +405,7 @@ void server::close_server() {
 	reset_player_names();
 }
 
+// Send a message to all clients that the server is ready to start the game.
 void server::start_game() {
 	m_accepting_clients = false;
 	m_is_in_game = true;

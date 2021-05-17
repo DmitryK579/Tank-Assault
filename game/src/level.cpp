@@ -37,6 +37,7 @@ level::~level() {
 
 }
 
+// Spawn tanks on the playing field
 void level::initialize_tanks() {
 	m_is_active = true;
 	std::vector<float>terrain_boundaries = m_terrain->get_terrain_boundaries();
@@ -73,6 +74,7 @@ void level::synchronization_check() {
 }
 // Call each frame
 void level::on_update(const engine::timestep& time_step) {
+	// Update tank states from network messages
 	if (m_network_ref->is_active()) {
 		std::vector<network_message::object_states> network_tank_states = m_network_ref->get_received_tank_states();
 		for (int i = 0; i < network_tank_states.size(); i++) {
@@ -89,6 +91,7 @@ void level::on_update(const engine::timestep& time_step) {
 		}
 	}
 	else {
+		// This can only happen if the server disconnected or client's connection timed out.
 		if (m_player_id != 0) {
 			quit_to_menu();
 		}
@@ -99,17 +102,11 @@ void level::on_update(const engine::timestep& time_step) {
 		// If player pressed a different key, update player's tank behaviour
 		if (m_player_controller->new_move_command()) {
 			m_tanks[m_player_id]->change_movement_direction(m_player_controller->get_move_command());
-			/*
-			if (m_network_ref->is_active()) {
-				glm::vec2 tank_position = m_tanks[m_player_id]->get_position();
-				network_message::object_states tank_state =
-				{ m_player_id,tank_position.x,tank_position.y,m_player_controller->get_command(), false, true };
-				m_network_ref->send_tank_state(tank_state);
-
-			}*/
 		}
 
 		if (m_network_ref->is_active()) {
+
+			//Send states of all objects if they changed their behaviour or if a client disconnected from the game.
 			if (m_network_ref->is_hosting()) {
 				for (int i = 0; i < m_tanks.size(); i++) {
 					if (m_tanks[i]->was_move_command_updated() || m_network_ref->player_in_game_disconnected()) {
@@ -119,6 +116,7 @@ void level::on_update(const engine::timestep& time_step) {
 						m_network_ref->send_tank_state(tank_state);
 					}
 				}
+				// Prevent the disconnected client from affecting the game.
 				if (m_network_ref->player_in_game_disconnected()) {
 					for (int i = 0; i < m_tanks.size(); i++) {
 						if (i < m_network_ref->get_max_players()){
@@ -131,8 +129,10 @@ void level::on_update(const engine::timestep& time_step) {
 						}
 					}
 				}
+				// Confirm to the network class that all object states have been sent.
 				m_network_ref->object_states_sent();
 			}
+			// If client, send only the state of own tank if its state was updated.
 			else {
 				if (m_tanks[m_player_id]->was_move_command_updated()) {
 					glm::vec2 tank_position = m_tanks[m_player_id]->get_position();
@@ -143,7 +143,7 @@ void level::on_update(const engine::timestep& time_step) {
 			}
 		}
 
-		// Update other tanks
+		// Update the position of all tanks on the field
 		for (int i = 0; i < m_tanks.size(); i++) {
 			m_tanks[i]->on_update(time_step);
 		}
@@ -164,6 +164,7 @@ void level::on_render(engine::ref<engine::shader> shader) {
 	}
 }
 
+// Reset class variables and prepare to switch to menu.
 void level::quit_to_menu() {
 	m_network_ref->leave_server();
 	m_player_id = 0;

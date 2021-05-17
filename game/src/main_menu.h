@@ -22,6 +22,7 @@ public:
 
 private:
 	void apply_pressed_key(std::string& target, std::string pressed_key, bool erase_character,int character_limit);
+
 	engine::ref<engine::text_manager>				m_text_manager{};
 	engine::ref<sprite>								m_selection_arrow{};
 	engine::ref<sprite>								m_sprite{};

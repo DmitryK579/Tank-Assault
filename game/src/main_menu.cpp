@@ -138,7 +138,7 @@ main_menu::~main_menu() {
 
 //Call each frame
 void main_menu::on_update(const engine::timestep& time_step) {
-	if (m_in_menu) {
+	if (m_in_menu && m_menu_state != state_multiplayer_lobby_host) {
 		m_lock_controls = false;
 	}
 	if (m_menu_state == state_multiplayer_lobby_host || m_menu_state == state_multiplayer_lobby_client) {
