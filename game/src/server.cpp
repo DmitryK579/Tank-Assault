@@ -414,6 +414,7 @@ void server::close_server() {
 		send_message(message, m_valid_connections[i].first, m_valid_connections[i].second);
 	}
 	m_is_active = false;
+	m_is_in_game = false;
 	m_accepting_clients = false;
 	m_all_players_ready = false;
 	m_socket.unbind();
