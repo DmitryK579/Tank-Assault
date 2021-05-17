@@ -57,16 +57,22 @@ void application_layer::on_update(const engine::timestep& time_step)
 {
 	m_network->on_update(time_step);
 	if (m_in_menu) {
-		m_in_menu = m_main_menu->on_update(time_step);
-
+		m_main_menu->on_update(time_step);
+		m_in_menu = m_main_menu->get_in_menu();
 		if (!m_in_menu) {
 			m_in_level = true;
+			m_level->set_in_menu(false);
 			m_level->initialize_tanks();
 			
 		}
 	}
 	else if (m_in_level){
 		m_level->on_update(time_step);
+		if (m_level->get_in_menu() == true) {
+			m_in_level = false;
+			m_in_menu = true;
+			m_main_menu->set_in_menu(true);
+		}
 	}
 } 
 
@@ -98,13 +104,6 @@ void application_layer::on_event(engine::event& event)
 {
     if(event.event_type() == engine::event_type_e::key_pressed) 
     {
-		auto& e = dynamic_cast<engine::key_pressed_event&>(event);
-		if (e.key_code() == engine::key_codes::KEY_ESCAPE)
-		{
-			m_network->leave_server();
-			engine::application::exit();
-		}
-
 		if (m_in_menu) {
 			// Pass key event type to menu
 			m_main_menu->on_event(event);
@@ -112,10 +111,14 @@ void application_layer::on_event(engine::event& event)
 		else if (m_in_level){
 			// Pass key event type to level entities
 			m_level->on_event(event);
+
+			/*
+			auto& e = dynamic_cast<engine::key_pressed_event&>(event);
 			if (e.key_code() == engine::key_codes::KEY_TAB)
 			{
 				engine::render_command::toggle_wireframe();
 			}
+			*/
 		}
     } 
 }

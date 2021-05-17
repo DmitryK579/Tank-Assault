@@ -8,13 +8,13 @@ public:
 	~player_controller();
 
 	void on_update();
-	bool new_command();
+	bool new_move_command();
 
-	char get_command() { return m_command; }
+	char get_move_command() { return m_move_command; }
 
 	static engine::ref<player_controller> create();
 private:
-	char m_command;
-	char m_old_command;
+	char m_move_command;
+	char m_old_move_command;
 	bool m_controls_locked;
 };

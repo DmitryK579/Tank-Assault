@@ -10,22 +10,34 @@ public:
 		std::string message_body;
 	};
 
+	struct object_states {
+		int object_id;
+		float x_coords;
+		float y_coords;
+		char movement_command;
+		bool fire;
+		bool connected;
+	};
+
 	static std::vector<std::string> split_message(const std::string& string);
 
 	static constexpr char separation_symbol = ';';
 
 	static constexpr int id_request_join = 1; // Client message
 	static constexpr int id_request_join_response = 2; // Server message
-	static constexpr int id_user_id_assignment = 3; // Server message
-	static constexpr int id_player_name = 4; // Client message
-	static constexpr int id_all_player_names = 5; // Server message
-	static constexpr int id_ping = 6; // Common message
-	static constexpr int id_leave = 7; // Common message
-	static constexpr int id_kick = 8; // Server message
-	static constexpr int id_start_game = 9; // Server message
-	static constexpr int id_start_sync = 10; // Client message
-	static constexpr int id_start_sync_confirmed = 11; // Server message
-	static constexpr int id_tank_state = 12; // Common message
+	static constexpr int id_user_id_request = 3; // Client message
+	static constexpr int id_user_id_assignment = 4; // Server message
+	static constexpr int id_player_name_request = 5; // Server message
+	static constexpr int id_player_name = 6; // Client message
+	static constexpr int id_all_player_names_request = 7; // Client message
+	static constexpr int id_all_player_names = 8; // Server message
+	static constexpr int id_ping = 9; // Common message
+	static constexpr int id_leave = 10; // Common message
+	static constexpr int id_kick = 11; // Server message
+	static constexpr int id_start_game = 12; // Server message
+	static constexpr int id_start_sync = 13; // Client message
+	static constexpr int id_start_sync_confirmed = 14; // Server message
+	static constexpr int id_tank_state = 15; // Common message
 
 
 };

@@ -11,9 +11,12 @@ public:
 
 	void confirm_selection();
 	void switch_menu(int menu_choice);
-	bool on_update(const engine::timestep& time_step);
+	void on_update(const engine::timestep& time_step);
 	void on_render(engine::ref<engine::shader> image_shader, engine::ref<engine::shader> text_shader);
 	void on_event(engine::event& event);
+
+	void set_in_menu(bool state) { m_in_menu = state; }
+	bool get_in_menu() { return m_in_menu; }
 
 	static engine::ref<main_menu> create(engine::ref<network> network_ref);
 

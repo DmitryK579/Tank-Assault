@@ -146,7 +146,10 @@ main_menu::~main_menu() {
 }
 
 //Call each frame
-bool main_menu::on_update(const engine::timestep& time_step) {
+void main_menu::on_update(const engine::timestep& time_step) {
+	if (m_in_menu) {
+		m_lock_controls = false;
+	}
 	if (m_menu_state == state_multiplayer_lobby_host || m_menu_state == state_multiplayer_lobby_client) {
 		// Quit lobby if network connection no longer active
 		if (m_network_ref->is_active() == false) {
@@ -156,9 +159,10 @@ bool main_menu::on_update(const engine::timestep& time_step) {
 		// Begin game if all players are ready
 		if (m_network_ref->all_players_ready()) {
 			m_in_menu = false;
+			m_lock_controls = true;
+			switch_menu(state_title_screen);
 		}
 	}
-	return m_in_menu;
 }
 
 //Call during a key press event
@@ -256,6 +260,7 @@ void main_menu::confirm_selection() {
 		// Start single player game
 		if (m_current_menu_choice == 0) {
 			m_in_menu = false;
+			m_lock_controls = true;
 		}
 		// Move to multi player menu
 		if (m_current_menu_choice == 1) {

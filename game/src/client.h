@@ -13,12 +13,16 @@ public:
 	void recieve_messages();
 	void join_server(sf::IpAddress ip_address, unsigned short port, std::string player_name);
 	void leave_server();
+	void send_tank_state(network_message::object_states& tank_state);
 
 	bool is_active() { return m_is_active; }
 	bool all_players_ready() { return m_all_players_ready; }
 	std::vector<std::string> get_player_names() { return m_player_names; }
 	int get_id() { return m_user_id; }
 	int get_number_of_players();
+
+	std::vector <network_message::object_states> get_received_tank_states() { return m_received_tank_states; }
+	void erase_received_tank_states(int entries_to_delete);
 
 	static engine::ref<client> create(unsigned short server_port);
 
@@ -27,12 +31,19 @@ private:
 
 	void send_user_name();
 	void game_start_response();
+	void retry_send();
+	void store_tank_state(const network_message::message& message);
+
+	void switch_connection_step(int step);
 
 	sf::Packet write_to_sfml_packet(const network_message::message& message);
 	network_message::message read_message_from_sfml_packet(sf::Packet& packet);
 
 	int m_user_id;
 	int m_connection_step;
+	int m_max_reconnection_attempts;
+	int m_current_reconnection_attempt;
+	float m_timeout_timer;
 	unsigned short m_server_port;
 	sf::IpAddress m_server_ip;
 	unsigned short m_user_port;
@@ -42,6 +53,7 @@ private:
 	std::string m_public_ip_address;
 	std::string m_local_ip_address;
 	std::vector <std::string> m_player_names;
+	std::vector<network_message::object_states> m_received_tank_states;
 
 	bool m_is_active;
 	bool m_all_players_ready;

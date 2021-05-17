@@ -60,9 +60,11 @@ void network::server_start_game() {
 void network::on_update(const engine::timestep& time_step) {
 	if (m_is_active) {
 		if (m_is_host) {
+			m_server->on_update(time_step);
 			m_is_active = m_server->is_active();
 		}
 		else {
+			m_client->on_update(time_step);
 			m_is_active = m_client->is_active();
 		}
 	}
@@ -101,12 +103,47 @@ int network::get_number_of_players() {
 	}
 }
 
+std::vector<network_message::object_states> network::get_received_tank_states() {
+	std::vector<network_message::object_states> received_tank_states;
+	if (m_is_host) {
+		received_tank_states = m_server->get_received_tank_states();
+		m_server->erase_received_tank_states(received_tank_states.size());
+	}
+	else {
+		received_tank_states = m_client->get_received_tank_states();
+		m_client->erase_received_tank_states(received_tank_states.size());
+	}
+	return received_tank_states;
+}
+
+void network::send_tank_state(network_message::object_states& tank_state) {
+	if (m_is_host) {
+		m_server->send_tank_state(tank_state);
+	}
+	else {
+		m_client->send_tank_state(tank_state);
+	}
+}
+
 bool network::all_players_ready() {
 	if (m_is_host) {
 		return m_server->all_players_ready();
 	}
 	else {
 		return m_client->all_players_ready();
+	}
+}
+
+bool network::player_in_game_disconnected() {
+	if (m_is_host) {
+		return m_server->player_in_game_disconnected();
+	}
+	return false;
+}
+
+void network::object_states_sent() {
+	if (m_is_host) {
+		m_server->object_states_sent();
 	}
 }
 
