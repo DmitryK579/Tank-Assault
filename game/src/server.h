@@ -41,7 +41,8 @@ private:
 	void disconnect_player(int id);
 	void start_sync_response();
 	void store_tank_state(const network_message::message& message);
-	void kick(sf::IpAddress sender, unsigned short port);
+	void kick(const sf::IpAddress& ip, const unsigned short& port);
+	void respond_to_ping(const sf::IpAddress& ip, const unsigned short& port);
 
 	sf::Packet write_to_sfml_packet(const network_message::message& message);
 	network_message::message read_message_from_sfml_packet(sf::Packet& packet);

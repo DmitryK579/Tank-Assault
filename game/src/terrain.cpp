@@ -4,6 +4,11 @@ terrain::terrain(const std::string& path) {
 	m_terrain_spritesheet = engine::texture_2d::create(path, true);
 	m_tile_size_x = 40;
 	m_tile_size_y = 40;
+	m_up_boundary = 0;
+	m_down_boundary = 0;
+	m_right_boundary = 0;
+	m_left_boundary = 0;
+
 }
 
 terrain::~terrain() {
@@ -25,6 +30,24 @@ void terrain::build_layout(int horizontal_tile_number, int vertical_tile_number,
 			glm::vec2(1.f-(terrain_sequence[i].second * image_step_y + image_step_y), 1.f - (terrain_sequence[i].second * image_step_y)));
 		m_terrain_quads.push_back(quad);
 	}
+
+	float terrain_x_size = m_tile_size_x * (horizontal_tile_number-1);
+	float terrain_y_size = m_tile_size_y * (vertical_tile_number-1);
+
+	m_up_boundary = terrain_y_size + 40;
+	m_down_boundary = -terrain_y_size + 40;
+	m_right_boundary = terrain_x_size - 120;
+	m_left_boundary = -terrain_x_size - 120;
+
+}
+
+std::vector<float> terrain::get_terrain_boundaries() {
+	std::vector<float> boundaries;
+	boundaries.push_back(m_up_boundary);
+	boundaries.push_back(m_down_boundary);
+	boundaries.push_back(m_right_boundary);
+	boundaries.push_back(m_left_boundary);
+	return boundaries;
 }
 
 // Call to render all ground tiles.

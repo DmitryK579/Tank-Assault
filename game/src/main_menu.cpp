@@ -93,9 +93,6 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 
 	m_selection_arrow = sprite::create("assets/textures/arrow.png", 40, 40);
 	engine::ref<sprite> main_menu = sprite::create("assets/textures/MainMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
-	engine::ref<sprite> options_menu = sprite::create("assets/textures/OptionsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
-	engine::ref<sprite> controls_menu = sprite::create("assets/textures/ControlsMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
-	engine::ref<sprite> volume_menu = sprite::create("assets/textures/VolumeMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
 	engine::ref<sprite> multiplayer_menu = sprite::create("assets/textures/MultiplayerMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
 	engine::ref<sprite> multiplayer_join_menu = sprite::create("assets/textures/MultiplayerJoinMenu.png", (float)engine::application::window().width(), (float)engine::application::window().height());
 	engine::ref<sprite> multiplayer_connection_status_menu = sprite::create("assets/textures/MultiplayerConnectionStatus.png", (float)engine::application::window().width(), (float)engine::application::window().height());
@@ -103,9 +100,6 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 	engine::ref<sprite> multiplayer_lobby_client_menu = sprite::create("assets/textures/MultiplayerLobbyClient.png", (float)engine::application::window().width(), (float)engine::application::window().height());
 
 	m_menu_sprites.push_back(main_menu);
-	m_menu_sprites.push_back(options_menu);
-	m_menu_sprites.push_back(controls_menu);
-	m_menu_sprites.push_back(volume_menu);
 	m_menu_sprites.push_back(multiplayer_menu);
 	m_menu_sprites.push_back(multiplayer_join_menu);
 	m_menu_sprites.push_back(multiplayer_connection_status_menu);
@@ -117,10 +111,7 @@ main_menu::main_menu(engine::ref<network> network_ref) {
 	for (int i = 0; i < menu_states; i++) {
 		m_menu_choices.push_back(0);
 	}
-	m_menu_choices[state_title_screen] = 4;
-	m_menu_choices[state_options_menu] = 3;
-	m_menu_choices[state_controls_menu] = 2;
-	m_menu_choices[state_volume_menu] = 3;
+	m_menu_choices[state_title_screen] = 3;
 	m_menu_choices[state_multiplayer_menu] = 4;
 	m_menu_choices[state_multiplayer_join_menu] = 4;
 	m_menu_choices[state_multiplayer_connection_status] = 1;
@@ -266,54 +257,13 @@ void main_menu::confirm_selection() {
 		if (m_current_menu_choice == 1) {
 			switch_menu(state_multiplayer_menu);
 		}
-		// Move to options menu
-		if (m_current_menu_choice == 2) {
-			switch_menu(state_options_menu);
-		}
+
 		// Exit the application
-		if (m_current_menu_choice == 3) {
+		if (m_current_menu_choice == 2) {
 			engine::application::exit();
 		}
 	}
-	// Options menu currently not functional
-	else if (m_menu_state == state_options_menu) {
-		// Change controls
-		if (m_current_menu_choice == 0) {
-			switch_menu(state_controls_menu);
-		}
-		// Change volume
-		if (m_current_menu_choice == 1) {
-			switch_menu(state_volume_menu);
-		}
-		// Back to title screen
-		if (m_current_menu_choice == 2) {
-			switch_menu(state_title_screen);
-		}
-	}
-	else if (m_menu_state == state_controls_menu) {
-		// Change keys
-		if (m_current_menu_choice == 0) {
 
-		}
-		// Back to options menu
-		if (m_current_menu_choice == 1) {
-			switch_menu(state_options_menu);
-		}
-	}
-	else if (m_menu_state == state_volume_menu) {
-		// Change music volume
-		if (m_current_menu_choice == 0) {
-
-		}
-		// Change sound volume
-		if (m_current_menu_choice == 1) {
-
-		}
-		// Back to options menu
-		if (m_current_menu_choice == 2) {
-			switch_menu(state_options_menu);
-		}
-	}
 	else if (m_menu_state == state_multiplayer_menu) {
 		// Enter player name
 		if (m_current_menu_choice == 0) {

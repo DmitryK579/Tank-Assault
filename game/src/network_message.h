@@ -32,12 +32,13 @@ public:
 	static constexpr int id_all_player_names_request = 7; // Client message
 	static constexpr int id_all_player_names = 8; // Server message
 	static constexpr int id_ping = 9; // Common message
-	static constexpr int id_leave = 10; // Common message
-	static constexpr int id_kick = 11; // Server message
-	static constexpr int id_start_game = 12; // Server message
-	static constexpr int id_start_sync = 13; // Client message
-	static constexpr int id_start_sync_confirmed = 14; // Server message
-	static constexpr int id_tank_state = 15; // Common message
+	static constexpr int id_ping_return = 10;
+	static constexpr int id_leave = 11; // Common message
+	static constexpr int id_kick = 12; // Server message
+	static constexpr int id_start_game = 13; // Server message
+	static constexpr int id_start_sync = 14; // Client message
+	static constexpr int id_start_sync_confirmed = 15; // Server message
+	static constexpr int id_tank_state = 16; // Common message
 
 
 };

@@ -14,6 +14,7 @@ public:
 	bool was_move_command_updated();
 
 	void set_position(float x, float y) { m_position = glm::vec2(x, y); }
+	void set_level_boundaries(float up, float down, float right, float left);
 	void set_active(bool state) { m_active = state; }
 	glm::vec2 get_position() { return m_position; }
 	int get_id() { return m_id; }
@@ -35,7 +36,10 @@ private:
 	int m_id;
 	float m_speed;
 	float m_angle;
-	int m_hit_points;
+	float m_up_boundary;
+	float m_down_boundary;
+	float m_left_boundary;
+	float m_right_boundary;
 	bool m_active;
 	bool m_is_moving_up;
 	bool m_is_moving_down;

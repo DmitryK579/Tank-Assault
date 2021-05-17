@@ -39,9 +39,15 @@ level::~level() {
 
 void level::initialize_tanks() {
 	m_is_active = true;
+	std::vector<float>terrain_boundaries = m_terrain->get_terrain_boundaries();
+	float up_boundary = terrain_boundaries[0];
+	float down_boundary = terrain_boundaries[1];
+	float right_boundary = terrain_boundaries[2];
+	float left_boundary = terrain_boundaries[3];
 	// If single player
 	if (!m_network_ref->is_active()) {
 		engine::ref<tank> tank = tank::create(0);
+		tank->set_level_boundaries(up_boundary, down_boundary, right_boundary, left_boundary);
 		m_tanks.push_back(tank);
 		m_new_object_id += 1;
 	}
@@ -51,6 +57,8 @@ void level::initialize_tanks() {
 		m_player_id = m_network_ref->get_user_id();
 		for (int i = 0; i < players; i++) {
 			engine::ref<tank> tank = tank::create(i);
+			tank->set_position((-80 * i), (-80 * i));
+			tank->set_level_boundaries(up_boundary, down_boundary, right_boundary, left_boundary);
 			m_tanks.push_back(tank);
 			m_new_object_id += 1;
 		}
@@ -158,6 +166,7 @@ void level::on_render(engine::ref<engine::shader> shader) {
 
 void level::quit_to_menu() {
 	m_network_ref->leave_server();
+	m_player_id = 0;
 	m_is_active = false;
 	m_tanks.clear();
 	m_in_menu = true;

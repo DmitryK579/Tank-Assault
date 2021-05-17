@@ -6,14 +6,17 @@ tank::tank(int id) {
 	// Initialize tank characteristics
 	m_active = true;
 	m_id = id;
-	m_hit_points = 3;
 	m_position = glm::vec2(.0f, .0f);
 	m_velocity = glm::vec2(.0f, 1.0f);
-	m_speed = 120.0f;
+	m_speed = 160.0f;
 	m_angle = 0.0f;
 	m_current_move_command = tank_commands::stop;
 	m_old_move_command = m_current_move_command;
 	stop();
+	m_up_boundary = 9000;
+	m_down_boundary = 9000;
+	m_right_boundary = 9000;
+	m_left_boundary = 9000;
 
 	// Initialize tank sprites and animation
 	if (id > 4) {
@@ -67,6 +70,11 @@ void tank::on_update(const engine::timestep& time_step) {
 		m_old_position = m_position;
 		if (moving) {
 			m_position = m_position + (m_velocity * m_speed * (float)time_step);
+
+			if (m_position.x > m_right_boundary || m_position.x < m_left_boundary ||
+				m_position.y > m_up_boundary || m_position.y < m_down_boundary) {
+				m_position = m_old_position;
+			}
 		}
 
 		m_chassis_sprite->set_animating(moving);
@@ -131,6 +139,13 @@ void tank::stop() {
 
 bool tank::was_move_command_updated() {
 	return (m_old_move_command != m_current_move_command);
+}
+
+void tank::set_level_boundaries(float up, float down, float right, float left) {
+	m_up_boundary = up;
+	m_down_boundary = down;
+	m_left_boundary = left;
+	m_right_boundary = right;
 }
 
 // Create pointer to class

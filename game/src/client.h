@@ -32,6 +32,7 @@ private:
 	void send_user_name();
 	void game_start_response();
 	void retry_send();
+	void respond_to_ping(const sf::IpAddress& ip, const unsigned short& port);
 	void store_tank_state(const network_message::message& message);
 
 	void switch_connection_step(int step);

@@ -44,14 +44,11 @@ private:
 	glm::vec3										m_text_colour_entering;
 
 	const int										state_title_screen = 0;
-	const int										state_options_menu = 1;
-	const int										state_controls_menu = 2;
-	const int										state_volume_menu = 3;
-	const int										state_multiplayer_menu = 4;
-	const int										state_multiplayer_join_menu = 5;
-	const int										state_multiplayer_connection_status = 6;
-	const int										state_multiplayer_lobby_host = 7;
-	const int										state_multiplayer_lobby_client = 8;
+	const int										state_multiplayer_menu = 1;
+	const int										state_multiplayer_join_menu = 2;
+	const int										state_multiplayer_connection_status = 3;
+	const int										state_multiplayer_lobby_host = 4;
+	const int										state_multiplayer_lobby_client = 5;
 
 	std::string										m_player_name;
 	std::string										m_ip_address;

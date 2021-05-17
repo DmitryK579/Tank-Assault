@@ -87,6 +87,12 @@ void client::process_message(const network_message::message& message, const sf::
 		case network_message::id_ping:
 			m_timeout_timer = 0;
 			m_current_reconnection_attempt = 0;
+			respond_to_ping(sender, port);
+			break;
+
+		case network_message::id_ping_return:
+			m_timeout_timer = 0;
+			m_current_reconnection_attempt = 0;
 			break;
 
 		// Server closed by host
@@ -212,6 +218,11 @@ void client::send_tank_state(network_message::object_states& tank_state) {
 
 	send_message(message, m_server_ip, m_server_port);
 	
+}
+
+void client::respond_to_ping(const sf::IpAddress& ip, const unsigned short& port) {
+	network_message::message message = { m_user_id,network_message::id_ping_return,"" };
+	send_message(message, ip, port);
 }
 
 void client::store_tank_state(const network_message::message& message) {

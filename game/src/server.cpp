@@ -66,6 +66,12 @@ void server::process_message(const network_message::message& message, const sf::
 			case network_message::id_ping:
 				m_client_timeout_info[message.sender_id - 1].first = 0;
 				m_client_timeout_info[message.sender_id - 1].second = 0;
+				respond_to_ping(sender, port);
+				break;
+
+			case network_message::id_ping_return:
+				m_client_timeout_info[message.sender_id - 1].first = 0;
+				m_client_timeout_info[message.sender_id - 1].second = 0;
 				break;
 
 				// Client left the server
@@ -324,8 +330,13 @@ void server::object_states_sent() {
 	m_player_in_game_disconnected = false;
 }
 
-void server::kick(sf::IpAddress ip, unsigned short port) {
+void server::kick(const sf::IpAddress& ip, const unsigned short& port) {
 	network_message::message message = { m_user_id, network_message::id_kick,"" };
+	send_message(message, ip, port);
+}
+
+void server::respond_to_ping(const sf::IpAddress& ip, const unsigned short& port) {
+	network_message::message message = { m_user_id,network_message::id_ping_return,"" };
 	send_message(message, ip, port);
 }
 
