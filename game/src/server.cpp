@@ -175,9 +175,11 @@ void server::respond_to_join_request(const network_message::message& message, co
 			std::string body = "";
 			if (m_accepting_clients) {
 				// Accept join request
+				m_mutex.lock();
 				m_valid_connections.push_back({ sender,port });
 				m_client_connection_steps.push_back(step_request_name);
 				m_client_timeout_info.push_back({ 0.0f, 0 });
+				m_mutex.unlock();
 				body = "y";
 				send_new_id = true;
 
@@ -220,9 +222,11 @@ void server::send_all_player_names() {
 void server::disconnect_player(int id) {
 	if (!m_is_in_game) {
 		// Erase connection details
+		m_mutex.lock();
 		m_valid_connections.erase(m_valid_connections.begin() + id - 1);
 		m_client_connection_steps.erase(m_client_connection_steps.begin() + id - 1);
 		m_client_timeout_info.erase(m_client_timeout_info.begin() + id - 1);
+		m_mutex.unlock();
 
 		// Move names up one position if client that disconnected is not the most recent client.
 		for (int i = id; i < m_player_names.size() - 1; i++) {
@@ -351,14 +355,29 @@ void server::store_tank_state(const network_message::message& message) {
 	tank.fire = stoi(tank_states[4]);
 	tank.connected = stoi(tank_states[5]);
 
+	m_mutex.lock();
 	m_received_tank_states.push_back(tank);
+	m_mutex.unlock();
 }
 
 // Erase entries from the start of the tank state vector
 void server::erase_received_tank_states(int entries_to_delete) {
+	m_mutex.lock();
 	for (int i = 0; i < entries_to_delete; i++) {
 		m_received_tank_states.erase(m_received_tank_states.begin());
 	}
+	m_mutex.unlock();
+}
+
+std::vector <network_message::object_states> server::get_received_tank_states() {
+	// Lock guard will unlock mutex after function returns.
+	std::lock_guard<std::mutex> lock_guard(m_mutex);
+	return m_received_tank_states;
+}
+
+std::vector <std::string> server::get_player_names() {
+	std::lock_guard<std::mutex> lock_guard(m_mutex);
+	return m_player_names;
 }
 
 // Confirmation from level class that all object states have been sent.

@@ -17,11 +17,11 @@ public:
 
 	bool is_active() { return m_is_active; }
 	bool all_players_ready() { return m_all_players_ready; }
-	std::vector<std::string> get_player_names() { return m_player_names; }
+	std::vector<std::string> get_player_names();
 	int get_id() { return m_user_id; }
 	int get_number_of_players();
 
-	std::vector <network_message::object_states> get_received_tank_states() { return m_received_tank_states; }
+	std::vector <network_message::object_states> get_received_tank_states();
 	void erase_received_tank_states(int entries_to_delete);
 
 	static engine::ref<client> create(unsigned short server_port);
@@ -62,6 +62,7 @@ private:
 	std::vector<network_message::object_states>		m_received_tank_states;
 
 	std::thread*									m_communication_thread;
+	std::mutex										m_mutex;
 
 	static const int								step_request_connect = 1;
 	static const int								step_request_id = 2;

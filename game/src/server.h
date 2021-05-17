@@ -20,9 +20,9 @@ public:
 	bool all_players_ready() { return m_all_players_ready; }
 	bool player_in_game_disconnected() { return m_player_in_game_disconnected; }
 	void object_states_sent();
-	std::vector<std::string> get_player_names() { return m_player_names; }
+	std::vector<std::string> get_player_names();
 	int get_number_of_players() { return m_valid_connections.size() + 1; }
-	std::vector <network_message::object_states> get_received_tank_states() { return m_received_tank_states; }
+	std::vector <network_message::object_states> get_received_tank_states();
 	void erase_received_tank_states(int entries_to_delete);
 
 	static engine::ref<server> create(unsigned short server_port, int max_players);
@@ -72,6 +72,7 @@ private:
 
 	std::vector<network_message::object_states>					m_received_tank_states;
 
+	std::mutex													m_mutex;
 	std::thread*												m_communication_thread;
 
 	static const int											step_request_name = 1;

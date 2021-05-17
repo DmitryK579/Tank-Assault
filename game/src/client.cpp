@@ -248,14 +248,29 @@ void client::store_tank_state(const network_message::message& message) {
 	tank.fire = stoi(tank_states[4]);
 	tank.connected = stoi(tank_states[5]);
 
+	m_mutex.lock();
 	m_received_tank_states.push_back(tank);
+	m_mutex.unlock();
 }
 
 // Erase entries from the start of the tank state vector.
 void client::erase_received_tank_states(int entries_to_delete) {
+	m_mutex.lock();
 	for (int i = 0; i < entries_to_delete; i++) {
 		m_received_tank_states.erase(m_received_tank_states.begin());
 	}
+	m_mutex.unlock();
+}
+
+std::vector <network_message::object_states> client::get_received_tank_states() {
+	// Lock guard will unlock mutex after function returns.
+	std::lock_guard < std::mutex> lock_guard(m_mutex);
+	return m_received_tank_states;
+}
+
+std::vector <std::string> client::get_player_names() {
+	std::lock_guard < std::mutex> lock_guard(m_mutex);
+	return m_player_names;
 }
 
 // Attempt to join an existing server by given IP. Also sets the client's port to listen for replies.
